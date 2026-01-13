@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>স্মার্ট ব্লাস্টিং লিস্ট প্রো</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Tesseract.js (OCR) -->
+    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
+    <!-- jsPDF & AutoTable (For PDF Generation) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['ui-sans-serif', 'system-ui', 'Noto Sans Bengali', 'sans-serif'], mono: ['ui-monospace', 'SFMono-Regular', 'monospace'] },
+                    colors: {
+                        border: "hsl(var(--border))", input: "hsl(var(--input))", ring: "hsl(var(--ring))", background: "hsl(var(--background))", foreground: "hsl(var(--foreground))",
+                        primary: { DEFAULT: "hsl(var(--primary))", foreground: "hsl(var(--primary-foreground))" },
+                        destructive: { DEFAULT: "hsl(var(--destructive))", foreground: "hsl(var(--destructive-foreground))" },
+                        muted: { DEFAULT: "hsl(var(--muted))", foreground: "hsl(var(--muted-foreground))" },
+                        card: { DEFAULT: "hsl(var(--card))", foreground: "hsl(var(--card-foreground))" },
+                    },
+                    borderRadius: { lg: "var(--radius)", md: "calc(var(--radius) - 2px)", sm: "calc(var(--radius) - 4px)" },
+                    animation: { 
+                        'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'toast-enter': 'toast-slide-in 0.25s ease-out forwards',
+                        'toast-exit': 'toast-swipe-out 0.2s ease-in forwards',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root { --radius: 0.5rem; --background: 0 0% 100%; --foreground: 240 10% 3.9%; --card: 0 0% 100%; --card-foreground: 240 10% 3.9%; --primary: 262.1 83.3% 57.8%; --primary-foreground: 210 40% 98%; --muted: 240 4.8% 95.9%; --muted-foreground: 240 3.8% 46.1%; --destructive: 0 84.2% 60.2%; --destructive-foreground: 210 40% 98%; --border: 240 5.9% 90%; --input: 240 5.9% 90%; --ring: 262.1 83.3% 57.8%; }
+        .dark { --background: 240 10% 3.9%; --foreground: 0 0% 98%; --card: 240 10% 3.9%; --card-foreground: 0 0% 98%; --primary: 263.4 70% 50.4%; --primary-foreground: 210 40% 98%; --muted: 240 3.7% 15.9%; --muted-foreground: 240 5% 64.9%; --destructive: 0 62.8% 30.6%; --destructive-foreground: 0 0% 98%; --border: 240 3.7% 15.9%; --input: 240 3.7% 15.9%; --ring: 263.4 70% 50.4%; }
+        
+        body { background-color: hsl(var(--background)); color: hsl(var(--foreground)); transition: background-color 0.3s ease, color 0.3s ease; }
+        
+        .shadcn-input { background-color: transparent; border: 1px solid hsl(var(--input)); border-radius: var(--radius); padding: 0.5rem 0.75rem; width: 100%; font-size: 0.875rem; transition: all 0.2s; color: hsl(var(--foreground)); }
+        .shadcn-input:focus { outline: none; border-color: hsl(var(--ring)); box-shadow: 0 0 0 2px hsl(var(--ring) / 0.2); }
+        .shadcn-btn { background-color: hsl(var(--primary)); color: hsl(var(--primary-foreground)); font-weight: 500; border-radius: var(--radius); padding: 0.5rem 1rem; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; }
+        .shadcn-btn:hover:not(:disabled) { opacity: 0.9; } .shadcn-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .shadcn-btn-destructive { background-color: hsl(var(--destructive)); color: hsl(var(--destructive-foreground)); font-weight: 500; border-radius: var(--radius); padding: 0.5rem 1rem; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; }
+        .shadcn-btn-outline { background-color: transparent; border: 1px solid hsl(var(--border)); color: hsl(var(--foreground)); font-weight: 500; border-radius: var(--radius); padding: 0.5rem 1rem; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; }
+        .shadcn-btn-outline:hover { background-color: hsl(var(--muted)); }
+        .shadcn-card { background-color: hsl(var(--card)); border: 1px solid hsl(var(--border)); border-radius: var(--radius); box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1); }
+        
+        /* Animations & Modals */
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-enter { animation: slideUp 0.3s ease-out forwards; }
+        .modal-overlay { background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity 0.2s ease-in-out; z-index: 60; }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-content { transform: scale(0.95) translateY(10px); transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); border: 1px solid hsl(var(--border)); }
+        .modal-overlay.active .modal-content { transform: scale(1) translateY(0); }
+        
+        /* Toast */
+        #toast-container { position: fixed; top: 1.5rem; right: 1.5rem; z-index: 100; display: flex; flex-direction: column; gap: 0.75rem; pointer-events: none; width: 100%; max-width: 380px; }
+        .shadcn-toast { pointer-events: auto; display: flex; align-items: start; gap: 0.75rem; background-color: hsl(var(--background)); color: hsl(var(--foreground)); border: 1px solid hsl(var(--border)); padding: 1rem; border-radius: var(--radius); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); font-size: 0.875rem; position: relative; overflow: hidden; }
+        .shadcn-toast::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
+        .toast-success::before { background-color: #22c55e; } .toast-error::before { background-color: #ef4444; } .toast-warning::before { background-color: #eab308; }
+        @keyframes toast-slide-in { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes toast-swipe-out { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(100%); } }
+
+        .highlight { background-color: rgba(253, 224, 71, 0.4); color: inherit; padding: 0 2px; border-radius: 2px; }
+        @media print { body { background: white; color: black; } header, #mobile-nav, #controls-card, .no-print { display: none !important; } #list-container { border: none; box-shadow: none; } }
+        @media (max-width: 640px) { #toast-container { top: 1rem; left: 1rem; right: 1rem; width: auto; max-width: none; } }
+    </style>
+</head>
+<body class="min-h-screen pt-20 pb-24 md:pb-10">
+
+<div id="toast-container"></div>
+
+<!-- Header -->
+<header class="fixed top-0 inset-x-0 bg-background/80 backdrop-blur-md border-b border-border z-40 h-16 flex items-center justify-between px-4 lg:px-8">
+    <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-bold shadow">
+            <i class="bi bi-box-seam-fill"></i>
+        </div>
+        <h1 class="font-bold text-lg tracking-tight">ব্লাস্টিং তালিকা</h1>
+    </div>
+    <div class="flex gap-2">
+        <button onclick="toggleTheme()" class="w-9 h-9 rounded-full border border-border flex items-center justify-center hover:bg-muted transition-colors">
+            <i id="theme-icon" class="bi bi-moon-stars"></i>
+        </button>
+    </div>
+</header>
+
+<main class="max-w-4xl mx-auto px-4 py-4">
+    <!-- Control Card -->
+    <div id="controls-card" class="shadcn-card p-5 mb-6">
+        <div class="flex justify-between items-center mb-4">
+            <span class="text-xs font-bold uppercase text-muted-foreground tracking-wider">কন্ট্রোল প্যানেল</span>
+            <div id="connection-status" class="flex items-center gap-2 text-xs font-medium px-2 py-1 rounded-full bg-yellow-100 text-yellow-800 cursor-pointer" onclick="showToast(this.title, 'default')" title="ডাটাবেস স্ট্যাটাস">
+                <span class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></span> সংযোগ হচ্ছে...
+            </div>
+        </div>
+        
+        <div id="error-box" class="hidden mb-4 p-3 bg-red-100 border border-red-200 text-red-800 rounded-md text-xs font-mono break-all"></div>
+
+        <!-- Date & Shift -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+            <div>
+                <label class="block text-xs font-medium mb-1.5 text-muted-foreground">তারিখ</label>
+                <div class="flex gap-2">
+                    <button onclick="changeDate(-1)" class="w-10 h-9 flex items-center justify-center rounded border border-border hover:bg-muted text-muted-foreground"><i class="bi bi-chevron-left"></i></button>
+                    <input type="date" id="date-picker" class="shadcn-input">
+                    <button onclick="changeDate(1)" class="w-10 h-9 flex items-center justify-center rounded border border-border hover:bg-muted text-muted-foreground"><i class="bi bi-chevron-right"></i></button>
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-medium mb-1.5 text-muted-foreground">শিফট</label>
+                <div class="flex bg-muted p-1 rounded-lg">
+                    <label class="flex-1 cursor-pointer">
+                        <input type="radio" name="shift" value="day" checked class="hidden peer">
+                        <span class="block text-center text-sm py-1.5 rounded-md peer-checked:bg-background peer-checked:text-primary peer-checked:shadow-sm transition-all font-medium text-muted-foreground">দিন</span>
+                    </label>
+                    <label class="flex-1 cursor-pointer">
+                        <input type="radio" name="shift" value="night" class="hidden peer">
+                        <span class="block text-center text-sm py-1.5 rounded-md peer-checked:bg-background peer-checked:text-primary peer-checked:shadow-sm transition-all font-medium text-muted-foreground">রাত</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Section with Improved Scanner -->
+        <div id="add-section" class="pt-4 border-t border-border">
+            <label class="block text-xs font-medium mb-1.5 text-muted-foreground">নতুন কোড (যেমন: A1-L12-BM-1011 1/2)</label>
+            <div class="flex flex-col sm:flex-row gap-2">
+                <select id="category-select" class="shadcn-input sm:w-1/3 bg-background">
+                    <option value="Blasting">Blasting</option>
+                    <option value="Import">Import</option>
+                    <option value="Damaged">Damaged</option>
+                    <option value="Return">Return</option>
+                </select>
+                <!-- Input Group with Scanner Button -->
+                <div class="relative flex-1 flex gap-1">
+                    <div class="relative flex-1">
+                        <input type="text" id="number-input" placeholder="A1-L12-BM-1011 1/2" class="shadcn-input pl-9 font-mono uppercase placeholder:normal-case">
+                        <i class="bi bi-box-seam absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"></i>
+                    </div>
+                    <button onclick="startScanner()" class="shadcn-btn-outline px-3 text-primary border-primary/30 hover:bg-primary/10" title="ক্যামেরা দিয়ে স্ক্যান করুন">
+                        <i class="bi bi-camera-fill"></i>
+                    </button>
+                </div>
+                <button id="add-btn" class="shadcn-btn w-full sm:w-auto px-6" disabled>
+                    <i class="bi bi-plus-lg mr-2"></i> যোগ
+                </button>
+            </div>
+            <p id="auth-message" class="text-xs text-destructive mt-2 text-center">যোগ করতে লগইন করুন</p>
+        </div>
+    </div>
+
+    <!-- Search -->
+    <div class="sticky top-16 z-30 bg-background/95 backdrop-blur pt-2 pb-4 no-print">
+        <div class="relative">
+            <input type="text" id="search-input" placeholder="কোড খুঁজুন..." class="shadcn-input pl-10 rounded-full border-muted-foreground/20 focus:border-primary font-mono placeholder:font-sans">
+            <i class="bi bi-search absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"></i>
+            <div class="absolute right-2 top-1/2 -translate-y-1/2">
+                <button onclick="toggleSearchScope()" id="scope-btn" class="text-[10px] px-2 py-1 bg-muted rounded text-muted-foreground hover:text-primary">বর্তমান</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Stats -->
+    <div class="grid grid-cols-3 gap-2 mb-4 animate-enter">
+        <div class="bg-card border border-border p-3 rounded-lg text-center shadow-sm">
+            <div class="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">মোট আইটেম</div>
+            <div class="text-xl font-bold mt-1" id="stat-total">0</div>
+        </div>
+        <div class="bg-green-50 border border-green-100 p-3 rounded-lg text-center dark:bg-green-900/10 dark:border-green-900/30 shadow-sm">
+            <div class="text-[10px] text-green-600 dark:text-green-400 uppercase font-bold tracking-wider">Blasting</div>
+            <div class="text-xl font-bold text-green-700 dark:text-green-400 mt-1" id="stat-blasting">0</div>
+        </div>
+        <div class="bg-red-50 border border-red-100 p-3 rounded-lg text-center dark:bg-red-900/10 dark:border-red-900/30 shadow-sm">
+            <div class="text-[10px] text-red-600 dark:text-red-400 uppercase font-bold tracking-wider">Damaged/Ret</div>
+            <div class="text-xl font-bold text-red-700 dark:text-red-400 mt-1" id="stat-dmg">0</div>
+        </div>
+    </div>
+
+    <!-- List Header -->
+    <div class="flex justify-between items-end mb-3 px-1">
+        <h3 id="list-title" class="font-semibold text-lg">ব্লাস্টিং তালিকা</h3>
+        <button onclick="copyAll()" class="text-xs font-medium text-primary hover:underline no-print flex items-center gap-1">
+            <i class="bi bi-copy"></i> সব কপি
+        </button>
+    </div>
+
+    <!-- List -->
+    <ul id="numbers-list" class="space-y-3 pb-4 min-h-[200px]">
+        <!-- Skeleton -->
+        <li class="animate-pulse bg-muted/50 rounded-lg p-4 h-16 border border-border"></li>
+    </ul>
+</main>
+
+<!-- Mobile Nav -->
+<div id="mobile-nav" class="fixed bottom-0 inset-x-0 bg-background/90 backdrop-blur border-t border-border h-[65px] z-50 lg:hidden flex justify-around items-center">
+    <button onclick="navTo('list')" class="flex flex-col items-center gap-1 p-2 text-primary"><i class="bi bi-list-ul text-xl"></i><span class="text-[10px]">লিস্ট</span></button>
+    <button onclick="navTo('add')" class="flex flex-col items-center gap-1 p-2 text-muted-foreground hover:text-primary"><i class="bi bi-plus-circle text-xl"></i><span class="text-[10px]">যোগ</span></button>
+    <button onclick="openModal('settings-modal')" class="flex flex-col items-center gap-1 p-2 text-muted-foreground hover:text-primary"><i class="bi bi-gear text-xl"></i><span class="text-[10px]">সেটিংস</span></button>
+</div>
+
+<!-- Confirmation Modal -->
+<div id="confirm-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4">
+    <div class="modal-content bg-card w-full max-w-[320px] rounded-xl p-6 shadow-2xl border border-border text-center">
+        <div class="w-12 h-12 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl"><i class="bi bi-exclamation-lg"></i></div>
+        <h3 id="confirm-title" class="font-bold text-lg mb-2">আপনি কি নিশ্চিত?</h3>
+        <p id="confirm-desc" class="text-sm text-muted-foreground mb-6">এই কাজটি আর ফিরিয়ে আনা যাবে না।</p>
+        <div class="grid grid-cols-2 gap-3">
+            <button id="confirm-cancel" class="shadcn-btn-outline">না, বাতিল</button>
+            <button id="confirm-ok" class="shadcn-btn-destructive">হ্যাঁ, মুছুন</button>
+        </div>
+    </div>
+</div>
+
+<!-- Tools Modal -->
+<div id="tools-modal" class="modal-overlay fixed inset-0 flex items-end sm:items-center justify-center p-4">
+    <div class="modal-content bg-card w-full sm:max-w-sm rounded-xl p-6 shadow-2xl border border-border">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="font-bold text-lg tracking-tight">টুলস</h3>
+            <button onclick="closeModal('tools-modal')" class="w-8 h-8 rounded-full hover:bg-muted flex items-center justify-center transition-colors"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+            <button onclick="downloadPDF()" class="p-4 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-lg flex flex-col items-center gap-2 hover:bg-red-100 dark:hover:bg-red-900/20 transition-all group">
+                <i class="bi bi-file-earmark-pdf text-2xl text-red-600 group-hover:scale-110 transition-transform"></i> <span class="text-xs font-bold text-red-700 dark:text-red-400">PDF Report</span>
+            </button>
+            <button onclick="downloadCSV()" class="p-4 bg-muted/50 border border-border rounded-lg flex flex-col items-center gap-2 hover:bg-muted hover:border-primary/50 transition-all group">
+                <i class="bi bi-file-earmark-spreadsheet text-2xl text-green-600 group-hover:scale-110 transition-transform"></i> <span class="text-xs font-bold">Excel Export</span>
+            </button>
+            <button onclick="shareToWhatsApp()" class="p-4 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-800 rounded-lg flex flex-col items-center gap-2 hover:bg-green-100 dark:hover:bg-green-900/20 col-span-2 group">
+                <i class="bi bi-whatsapp text-2xl text-green-600 group-hover:scale-110 transition-transform"></i> 
+                <span class="text-xs font-bold text-green-700 dark:text-green-400">WhatsApp Share</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="edit-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4">
+    <div class="modal-content bg-card w-full max-w-sm rounded-xl p-6 shadow-2xl border border-border">
+        <h3 class="font-bold text-lg mb-4 tracking-tight">এডিট করুন</h3>
+        <input type="hidden" id="edit-original">
+        <div class="space-y-4">
+            <div>
+                <label class="text-xs font-medium text-muted-foreground block mb-1.5">টাইপ</label>
+                <select id="edit-cat" class="shadcn-input bg-background">
+                    <option value="Blasting">Blasting</option>
+                    <option value="Import">Import</option>
+                    <option value="Damaged">Damaged</option>
+                    <option value="Return">Return</option>
+                </select>
+            </div>
+            <div>
+                <label class="text-xs font-medium text-muted-foreground block mb-1.5">নম্বর / কোড + পরিমাণ</label>
+                <input type="text" id="edit-num" class="shadcn-input font-mono font-semibold uppercase">
+                <p class="text-[10px] text-muted-foreground mt-1">উদাহরণ: A1-L12-BM-1014 = 10 pcs</p>
+            </div>
+        </div>
+        <div class="flex gap-3 mt-6">
+            <button onclick="closeModal('edit-modal')" class="flex-1 py-2 rounded-md border border-border text-sm font-medium hover:bg-muted transition-colors">বাতিল</button>
+            <button onclick="saveEdit()" class="flex-1 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity">আপডেট</button>
+        </div>
+    </div>
+</div>
+
+<!-- Settings Modal -->
+<div id="settings-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4">
+    <div class="modal-content bg-card w-full max-w-sm rounded-xl p-6 shadow-2xl border border-border">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="font-bold text-lg tracking-tight">অ্যাকাউন্ট</h3>
+            <button onclick="closeModal('settings-modal')" class="w-8 h-8 rounded-full hover:bg-muted flex items-center justify-center transition-colors"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div id="login-form" class="space-y-3">
+            <div class="space-y-1">
+                <label class="text-xs font-medium text-muted-foreground">ইউজারনেম</label>
+                <input type="text" id="username" class="shadcn-input">
+            </div>
+            <div class="space-y-1">
+                 <label class="text-xs font-medium text-muted-foreground">পাসওয়ার্ড</label>
+                <input type="password" id="password" class="shadcn-input">
+            </div>
+            <button onclick="login()" class="shadcn-btn w-full mt-2">লগইন</button>
+        </div>
+        <div id="profile-info" class="hidden text-center">
+            <div class="w-20 h-20 bg-primary/10 rounded-full mx-auto flex items-center justify-center text-4xl text-primary mb-4 ring-4 ring-primary/5"><i class="bi bi-shield-check"></i></div>
+            <p class="font-bold text-lg">ব্লাস্টিং ম্যানেজার</p>
+            <p id="user-display" class="text-sm text-muted-foreground mb-6"></p>
+            <div class="grid grid-cols-2 gap-3 mt-4">
+                <button onclick="openModal('tools-modal')" class="py-2.5 bg-muted text-foreground rounded-md text-xs font-bold hover:bg-muted/80 transition-colors">টুলস</button>
+                <button onclick="logout()" class="py-2.5 bg-destructive text-destructive-foreground rounded-md text-xs font-bold hover:opacity-90 transition-opacity">লগআউট</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- OCR Scanner Modal -->
+<div id="scanner-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 z-[70]">
+    <div class="modal-content bg-black w-full max-w-md rounded-xl overflow-hidden shadow-2xl border border-gray-700 relative">
+        <div class="absolute top-0 inset-x-0 p-4 flex justify-between items-center z-10 bg-gradient-to-b from-black/80 to-transparent">
+            <h3 class="text-white font-bold text-sm">কোড স্ক্যানার</h3>
+            <button onclick="stopScanner()" class="w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="relative h-[65vh] bg-gray-900 flex items-center justify-center overflow-hidden">
+            <video id="scan-video" class="absolute w-full h-full object-cover" autoplay playsinline></video>
+            <canvas id="scan-canvas" class="hidden"></canvas>
+            <div class="absolute w-64 h-32 border-2 border-primary/70 rounded-lg shadow-[0_0_0_9999px_rgba(0,0,0,0.6)] z-0 pointer-events-none">
+                <div class="absolute top-0 left-0 w-4 h-4 border-t-4 border-l-4 border-primary -mt-1 -ml-1"></div>
+                <div class="absolute top-0 right-0 w-4 h-4 border-t-4 border-r-4 border-primary -mt-1 -mr-1"></div>
+                <div class="absolute bottom-0 left-0 w-4 h-4 border-b-4 border-l-4 border-primary -mb-1 -ml-1"></div>
+                <div class="absolute bottom-0 right-0 w-4 h-4 border-b-4 border-r-4 border-primary -mb-1 -mr-1"></div>
+                <p class="absolute -top-6 w-full text-center text-white/80 text-xs font-bold shadow-black drop-shadow-md">কোড ও পরিমাণ এই বক্সের মধ্যে রাখুন</p>
+            </div>
+            <div id="scan-loading" class="absolute inset-0 bg-black/80 flex flex-col items-center justify-center z-20 hidden">
+                <div class="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mb-3"></div>
+                <p class="text-white text-xs font-mono animate-pulse">হাতের লেখা পড়ার চেষ্টা চলছে...</p>
+            </div>
+        </div>
+        <div class="bg-gray-900 p-6 flex justify-center items-center gap-4">
+            <button onclick="captureAndProcess()" class="w-16 h-16 rounded-full bg-white border-4 border-gray-300 flex items-center justify-center shadow-lg active:scale-95 transition-transform">
+                <div class="w-12 h-12 rounded-full bg-primary"></div>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const VALID_USERS = { "admin": "12345", "manager": "12345", "shanto": "shanto@123" };
+    
+    const SUPABASE_URL = "https://xrzvjpjqpzndiaatvncd.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_q4H87IB2Ig8Yehl6NLFvcA_B33p7e7y";
+
+    let dbClient = null;
+    try {
+        dbClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    } catch(e) { reportError("Supabase Init Failed: " + e.message); }
+
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    function playSound(type) {
+        if (audioContext.state === 'suspended') audioContext.resume();
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        osc.connect(gain);
+        gain.connect(audioContext.destination);
+        if (type === 'success') {
+            osc.frequency.setValueAtTime(800, audioContext.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(1200, audioContext.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            osc.start(); osc.stop(audioContext.currentTime + 0.3);
+        } else {
+            osc.frequency.setValueAtTime(200, audioContext.currentTime);
+            gain.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            osc.type = 'sawtooth';
+            osc.start(); osc.stop(audioContext.currentTime + 0.3);
+        }
+    }
+
+    let state = {
+        isLoggedIn: localStorage.getItem('isLoggedIn') === 'true',
+        user: localStorage.getItem('loggedInUser') || '',
+        date: new Date().toISOString().split('T')[0],
+        shift: 'day',
+        data: {}, 
+        scope: 'current', 
+    };
+
+    const els = {
+        date: document.getElementById('date-picker'),
+        shifts: document.getElementsByName('shift'),
+        list: document.getElementById('numbers-list'),
+        input: document.getElementById('number-input'),
+        cat: document.getElementById('category-select'),
+        search: document.getElementById('search-input'),
+        addBtn: document.getElementById('add-btn'),
+        status: document.getElementById('connection-status'),
+        errorBox: document.getElementById('error-box'),
+        scopeBtn: document.getElementById('scope-btn'),
+        title: document.getElementById('list-title'),
+        stats: { total: document.getElementById('stat-total'), blasting: document.getElementById('stat-blasting'), dmg: document.getElementById('stat-dmg') }
+    };
+
+    function init() {
+        els.date.value = state.date;
+        applyTheme();
+        updateAuth();
+        setupListeners();
+        connectDB();
+    }
+
+    function setupListeners() {
+        els.date.addEventListener('change', e => { state.date = e.target.value; render(); });
+        els.shifts.forEach(r => r.addEventListener('change', e => { state.shift = e.target.value; render(); }));
+        els.input.addEventListener('keypress', e => { if(e.key==='Enter') addNumber(); });
+        els.addBtn.addEventListener('click', addNumber);
+        els.search.addEventListener('input', render);
+        document.querySelectorAll('.modal-overlay').forEach(m => {
+            m.addEventListener('click', e => { if(e.target === m && m.id !== 'confirm-modal' && m.id !== 'scanner-modal') closeModal(m.id); });
+        });
+    }
+
+    function changeDate(days) {
+        const d = new Date(state.date);
+        d.setDate(d.getDate() + days);
+        state.date = d.toISOString().split('T')[0];
+        els.date.value = state.date;
+        render();
+    }
+
+    function reportError(msg) {
+        console.error(msg);
+        els.status.className = "bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-bold";
+        els.status.innerHTML = "সংযোগ ব্যর্থ";
+        els.errorBox.classList.remove('hidden');
+        els.errorBox.innerText = "Error: " + msg;
+    }
+
+    async function connectDB() {
+        if(!dbClient) return;
+        await fetchData();
+        dbClient.channel('public:daily_lists')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'daily_lists' }, payload => { fetchData(); })
+            .subscribe();
+    }
+
+    async function fetchData() {
+        try {
+            const { data, error } = await dbClient.from('daily_lists').select('*');
+            if (error) return reportError(error.message);
+            els.status.className = "flex items-center gap-2 text-xs font-medium px-2 py-1 rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
+            els.status.innerHTML = '<span class="w-2 h-2 rounded-full bg-green-500"></span> লাইভ';
+            els.errorBox.classList.add('hidden');
+            const formattedData = {};
+            if (data) {
+                data.forEach(row => {
+                    if (!formattedData[row.date]) formattedData[row.date] = {};
+                    formattedData[row.date][row.shift] = row.numbers || [];
+                });
+            }
+            state.data = formattedData;
+            render();
+        } catch (err) { reportError("Unexpected: " + err.message); }
+    }
+
+    async function updateRemote(date, shift, list) {
+        if(!dbClient) return;
+        const { error } = await dbClient.from('daily_lists').upsert({ date: date, shift: shift, numbers: list }, { onConflict: 'date, shift' });
+        if (error) showToast('সেভ হয়নি: ' + error.message, 'error');
+    }
+
+    function checkDuplicate(numToCheck) {
+        for(let d in state.data) {
+            for(let s in state.data[d]) {
+                const list = state.data[d][s] || [];
+                for(let item of list) { 
+                    const existingNum = parseItem(item).num;
+                    if(existingNum === numToCheck) return {d, s}; 
+                }
+            }
+        }
+        return null;
+    }
+
+    function formatExtraText(text) {
+        if (!text) return "";
+        let formatted = text.replace(/(\d+)\s*PIC/gi, '$1Pic').replace(/(\d+)\s*PCS/gi, '$1Pcs');
+        formatted = formatted.replace(/\bpic\b/gi, 'Pic').replace(/\bpcs\b/gi, 'Pcs');
+        return formatted;
+    }
+
+    async function addNumber() {
+        if(!state.isLoggedIn) return showToast('লগইন করুন', 'error');
+        const val = els.input.value.trim();
+        if(!val) return showToast('কোড লিখুন', 'error');
+        
+        const entries = val.split(/\n+/).map(s=>s.trim()).filter(Boolean);
+        if(!entries.length) return;
+
+        const currentList = (state.data[state.date] && state.data[state.date][state.shift]) ? [...state.data[state.date][state.shift]] : [];
+        let added = 0;
+        let duplicateDetails = [];
+
+        for(let rawEntry of entries) {
+            const match = rawEntry.match(/^([a-zA-Z0-9\-]+)(.*)$/);
+            let fullStr = rawEntry.toUpperCase();
+            
+            if (match) {
+                const codePart = match[1].toUpperCase();
+                let extraPart = match[2]; 
+                extraPart = formatExtraText(extraPart);
+                fullStr = extraPart ? `${codePart}${extraPart}` : codePart;
+            }
+
+            const exists = checkDuplicate(fullStr);
+            if(exists) { 
+                duplicateDetails.push({ num: fullStr, date: exists.d });
+                if(exists.d === state.date) continue; 
+            }
+            const full = `${els.cat.value} ${fullStr}`;
+            currentList.push(full); added++;
+        }
+
+        if(added > 0) {
+            currentList.sort();
+            if (!state.data[state.date]) state.data[state.date] = {};
+            state.data[state.date][state.shift] = currentList;
+            render();
+            playSound('success');
+            await updateRemote(state.date, state.shift, currentList);
+            els.input.value = '';
+            
+            const otherDayDups = duplicateDetails.filter(d => d.date !== state.date);
+            if(otherDayDups.length > 0) {
+                 showToast(`${added} টি সফল। (সতর্কতা: ${otherDayDups[0].num} আগে ${otherDayDups[0].date} এ ছিল)`, 'warning');
+            } else {
+                 showToast(`${added} টি সফলভাবে যোগ হয়েছে`, 'success');
+            }
+        } 
+        else if(duplicateDetails.length > 0) {
+            playSound('error');
+            const firstDup = duplicateDetails[0];
+            const msg = `এই কোডটি ইতিমধ্যে ${firstDup.date} তারিখে লিস্টি করা হয়েছে!`;
+            showToast(msg, 'error');
+        }
+    }
+
+    function getCatStyles(cat) {
+        switch(cat) {
+            case 'Blasting': return { class: 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800', icon: 'bi-box-seam' };
+            case 'Import': return { class: 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800', icon: 'bi-truck' };
+            case 'Damaged': return { class: 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800', icon: 'bi-x-octagon' };
+            case 'Return': return { class: 'bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-800', icon: 'bi-arrow-return-left' };
+            default: return { class: 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700', icon: 'bi-hash' };
+        }
+    }
+
+    function formatFraction(text) {
+        return text.replace(/(\d+)\/(\d+)/g, function(match, num, den) {
+            return `<span class="inline-flex flex-col text-center align-middle text-[0.65rem] leading-[0.8] mx-0.5 font-bold" style="vertical-align: middle;">
+                <span class="border-b border-current px-0.5">${num}</span>
+                <span class="pt-0.5">${den}</span>
+            </span>`;
+        });
+    }
+
+    function render() {
+        const q = els.search.value.toLowerCase();
+        let items = [];
+        if(state.scope === 'current') {
+            const raw = (state.data[state.date] && state.data[state.date][state.shift]) || [];
+            items = raw.map(i => ({ str: i, d: state.date, s: state.shift }));
+            els.title.innerText = `তালিকা (${state.shift === 'day' ? 'দিন' : 'রাত'}) - ${raw.length} টি`;
+        } else {
+            for(let d in state.data) {
+                for(let s in state.data[d]) {
+                    const raw = state.data[d][s] || [];
+                    raw.forEach(i => items.push({ str: i, d: d, s: s }));
+                }
+            }
+            items.sort((a, b) => new Date(b.d) - new Date(a.d));
+            els.title.innerText = q ? "সার্চ রেজাল্ট" : `সকল তালিকা (${items.length} টি)`;
+        }
+
+        const filtered = items.filter(x => x.str.toLowerCase().includes(q));
+
+        els.stats.total.innerText = filtered.length;
+        els.stats.blasting.innerText = filtered.filter(x => x.str.startsWith('Blasting')).length;
+        els.stats.dmg.innerText = filtered.filter(x => x.str.startsWith('Damaged') || x.str.startsWith('Return')).length;
+
+        els.list.innerHTML = '';
+        if(!filtered.length) {
+            els.list.innerHTML = `<div class="text-center py-10 opacity-50"><i class="bi bi-inbox text-4xl"></i><p class="text-sm mt-2">তথ্য নেই</p></div>`;
+            return;
+        }
+
+        els.list.innerHTML = filtered.map((x, i) => {
+            const {cat, num} = parseItem(x.str);
+            const match = num.match(/^([A-Z0-9\-]+)(.*)$/);
+            let code = num;
+            let extra = "";
+            
+            if(match) {
+                code = match[1];
+                extra = match[2].trim();
+            }
+            
+            let displayCode = code;
+            if(q) {
+                displayCode = code.replace(new RegExp(`(${q})`, "gi"), (match) => `<span class="highlight">${match}</span>`);
+            }
+
+            const formattedExtraText = formatExtraText(extra);
+            const finalExtraHtml = formattedExtraText ? formatFraction(formattedExtraText) : "";
+
+            const isMe = x.d === state.date && x.s === state.shift;
+            const style = getCatStyles(cat);
+            
+            return `
+            <li class="list-item group bg-card border border-border rounded-lg p-3 flex justify-between items-start shadow-sm animate-enter" style="animation-delay:${i*0.03}s">
+                <div class="flex-1 min-w-0">
+                    <div class="flex flex-wrap items-center gap-2 mb-1">
+                        <span class="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded border flex items-center gap-1 ${style.class}">
+                            <i class="bi ${style.icon}"></i> ${cat}
+                        </span>
+                        <div class="text-[10px] text-muted-foreground flex items-center gap-1">
+                           ${x.d}
+                        </div>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-1">
+                        <span class="font-mono font-bold text-lg uppercase tracking-tight text-foreground break-all">${displayCode}</span>
+                        ${finalExtraHtml ? `<span class="inline-flex items-center px-2 py-0.5 rounded-md bg-secondary text-secondary-foreground text-xs font-semibold border border-border"><i class="bi bi-tag-fill mr-1 opacity-70"></i>${finalExtraHtml}</span>` : ''}
+                    </div>
+                </div>
+                <div class="flex gap-2 items-center ml-2 mt-1">
+                    <button onclick="copyTxt('${x.str}')" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted text-muted-foreground transition-colors"><i class="bi bi-copy"></i></button>
+                    ${state.isLoggedIn && isMe ? `
+                    <button onclick="openEdit('${x.str}')" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-blue-50 text-blue-500 transition-colors"><i class="bi bi-pencil-square"></i></button>
+                    <button onclick="delItem('${x.str}')" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-50 text-destructive transition-colors"><i class="bi bi-trash"></i></button>
+                    ` : ''}
+                </div>
+            </li>`;
+        }).join('');
+    }
+
+    // --- PDF GENERATION FEATURE ---
+    async function downloadPDF() {
+        if(!state.isLoggedIn) return showToast('রিপোর্ট ডাউনলোড করতে লগইন করুন', 'error');
+        
+        const list = (state.data[state.date] && state.data[state.date][state.shift]) || [];
+        if(!list.length) return showToast('রিপোর্ট তৈরির জন্য কোন তথ্য নেই', 'error');
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        // Header
+        doc.setFontSize(18);
+        doc.text("Blasting Production Report", 14, 20);
+        
+        doc.setFontSize(10);
+        doc.text(`Date: ${state.date}`, 14, 30);
+        doc.text(`Shift: ${state.shift === 'day' ? 'Day' : 'Night'}`, 14, 35);
+        doc.text(`Generated By: ${state.user}`, 14, 40);
+
+        // Stats Summary
+        const total = list.length;
+        
+        doc.setDrawColor(200);
+        doc.setFillColor(245, 245, 245);
+        doc.rect(130, 15, 65, 18, 'F');
+        doc.text("Summary:", 135, 22);
+        doc.text(`Total Items: ${total}`, 135, 28);
+
+        // Table Data Preparation
+        const tableBody = list.map((item, index) => {
+            const { cat, num } = parseItem(item);
+            return [index + 1, cat, num];
+        });
+
+        // Generate Table
+        doc.autoTable({
+            startY: 50,
+            head: [['#', 'Category', 'Code / Details']],
+            body: tableBody,
+            theme: 'grid',
+            headStyles: { fillColor: [40, 40, 40] },
+            alternateRowStyles: { fillColor: [240, 240, 240] },
+        });
+
+        // Footer / Signature
+        const finalY = doc.lastAutoTable.finalY || 60;
+        doc.text("_______________________", 140, finalY + 30);
+        doc.text("Manager Signature", 145, finalY + 36);
+        doc.setFontSize(8);
+        doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 285);
+
+        // Save PDF
+        doc.save(`Report_${state.date}_${state.shift}.pdf`);
+        closeModal('tools-modal');
+        showToast('PDF রিপোর্ট ডাউনলোড হয়েছে', 'success');
+    }
+
+    let stream = null;
+    async function startScanner() {
+        if (!state.isLoggedIn) return showToast('স্ক্যান করতে লগইন করুন', 'error');
+        const modal = document.getElementById('scanner-modal');
+        const video = document.getElementById('scan-video');
+        try {
+            modal.classList.add('active');
+            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+            video.srcObject = stream;
+        } catch (err) {
+            console.error(err);
+            stopScanner();
+            showToast('ক্যামেরা চালু করা যায়নি', 'error');
+        }
+    }
+
+    function stopScanner() {
+        const modal = document.getElementById('scanner-modal');
+        const video = document.getElementById('scan-video');
+        const loading = document.getElementById('scan-loading');
+        modal.classList.remove('active');
+        loading.classList.add('hidden');
+        if (stream) { stream.getTracks().forEach(track => track.stop()); stream = null; }
+        video.srcObject = null;
+    }
+
+    async function captureAndProcess() {
+        const video = document.getElementById('scan-video');
+        const canvas = document.getElementById('scan-canvas');
+        const loading = document.getElementById('scan-loading');
+        if (!stream) return;
+
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        
+        ctx.filter = 'contrast(200%) grayscale(100%) brightness(110%)'; 
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        loading.classList.remove('hidden');
+        
+        try {
+            const result = await Tesseract.recognize(canvas, 'eng', { 
+                logger: m => console.log(m),
+                tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-=/abcdefghijklmnopqrstuvwxyz '
+            });
+            
+            const text = result.data.text;
+            console.log("Raw OCR:", text);
+            
+            const pattern = /([A-Z0-9]+-[A-Z0-9]+-[A-Z0-9]+-[A-Z0-9]+)(.*)/i;
+            const lines = text.split('\n');
+            let found = false;
+
+            for(let line of lines) {
+                const match = line.match(pattern);
+                if(match) {
+                    const code = match[1].toUpperCase();
+                    let extra = match[2].trim();
+                    extra = extra.replace(/^[^a-z0-9=\/]+/i, '');
+                    extra = formatExtraText(extra);
+
+                    const finalVal = extra ? `${code} ${extra}` : code;
+                    els.input.value = finalVal;
+                    playSound('success');
+                    showToast(`স্ক্যান হয়েছে: ${finalVal}`, 'success');
+                    stopScanner();
+                    found = true;
+                    break;
+                }
+            }
+            
+            if (!found) {
+                const simpleMatch = text.match(/[A-Z0-9]+-[A-Z0-9]+-[A-Z0-9]+-[A-Z0-9]+/i);
+                if(simpleMatch) {
+                     els.input.value = simpleMatch[0].toUpperCase();
+                     playSound('success');
+                     showToast(`কোড পাওয়া গেছে: ${simpleMatch[0]}`, 'success');
+                     stopScanner();
+                } else {
+                    showToast('কোড অস্পষ্ট। আবার চেষ্টা করুন।', 'warning');
+                    loading.classList.add('hidden');
+                }
+            }
+        } catch (err) {
+            console.error(err);
+            showToast('এরর: ' + err.message, 'error');
+            loading.classList.add('hidden');
+        }
+    }
+
+    function parseItem(str) { const parts = str.split(' '); return { cat: parts[0], num: parts.slice(1).join(' ') }; }
+    function showToast(msg, type = 'default') {
+        const container = document.getElementById('toast-container');
+        const icons = { success: '<i class="bi bi-check-circle-fill text-green-500"></i>', error: '<i class="bi bi-x-circle-fill text-red-500"></i>', warning: '<i class="bi bi-exclamation-triangle-fill text-yellow-500"></i>', default: '<i class="bi bi-info-circle-fill text-blue-500"></i>' };
+        const t = document.createElement('div'); t.className = `shadcn-toast toast-${type} animate-toast-enter`;
+        t.innerHTML = `<div class="mt-0.5 text-lg">${icons[type]||icons.default}</div><div class="flex-1"><p class="text-sm font-medium">${msg}</p></div>`;
+        container.appendChild(t); setTimeout(() => { t.style.animation='toast-swipe-out 0.2s ease-in forwards'; setTimeout(()=>t.remove(),200); }, 3000);
+    }
+    
+    function openConfirm(t,m){return new Promise(r=>{const el=document.getElementById('confirm-modal');document.getElementById('confirm-title').innerText=t;document.getElementById('confirm-desc').innerText=m;el.classList.add('active');const ok=()=>{c();r(true)};const no=()=>{c();r(false)};const c=()=>{document.getElementById('confirm-ok').removeEventListener('click',ok);document.getElementById('confirm-cancel').removeEventListener('click',no);el.classList.remove('active')};document.getElementById('confirm-ok').addEventListener('click',ok);document.getElementById('confirm-cancel').addEventListener('click',no)})}
+    async function delItem(str){if(await openConfirm('মুছে ফেলবেন?','এই আইটেমটি পারমানেন্টলি ডিলিট হবে।')){const l=state.data[state.date][state.shift].filter(i=>i!==str);state.data[state.date][state.shift]=l;render();await updateRemote(state.date,state.shift,l);showToast('ডিলিট হয়েছে','success')}}
+    function openEdit(str){const {cat,num}=parseItem(str);document.getElementById('edit-original').value=str;document.getElementById('edit-cat').value=cat;document.getElementById('edit-num').value=num;openModal('edit-modal')}
+    async function saveEdit(){const o=document.getElementById('edit-original').value,nc=document.getElementById('edit-cat').value,nn=document.getElementById('edit-num').value.trim();if(!nn)return;
+        let formattedNum = nn;
+        const match = nn.match(/^([a-zA-Z0-9\-]+)(.*)$/);
+        if (match) {
+             const cp = match[1].toUpperCase();
+             let ep = match[2];
+             ep = formatExtraText(ep);
+             formattedNum = ep ? `${cp}${ep}` : cp;
+        }
+
+        const l=[...state.data[state.date][state.shift]],i=l.indexOf(o);if(i>-1){l[i]=`${nc} ${formattedNum}`;state.data[state.date][state.shift]=l;render();await updateRemote(state.date,state.shift,l);showToast('আপডেট হয়েছে','success');closeModal('edit-modal')}}
+    function login(){const u=document.getElementById('username').value,p=document.getElementById('password').value;if(VALID_USERS[u]===p){state.isLoggedIn=true;state.user=u;localStorage.setItem('isLoggedIn','true');localStorage.setItem('loggedInUser',u);updateAuth();closeModal('settings-modal');showToast('লগইন সফল','success')}else showToast('ভুল তথ্য','error')}
+    function logout(){state.isLoggedIn=false;localStorage.removeItem('isLoggedIn');updateAuth();closeModal('settings-modal');}
+    function updateAuth(){els.addBtn.disabled=!state.isLoggedIn;document.getElementById('add-section').classList.toggle('opacity-50',!state.isLoggedIn);document.getElementById('add-section').classList.toggle('pointer-events-none',!state.isLoggedIn);document.getElementById('auth-message').classList.toggle('hidden',state.isLoggedIn);document.getElementById('login-form').classList.toggle('hidden',state.isLoggedIn);document.getElementById('profile-info').classList.toggle('hidden',!state.isLoggedIn);if(state.isLoggedIn)document.getElementById('user-display').innerText=state.user;render()}
+    function toggleTheme(){document.documentElement.classList.toggle('dark');localStorage.setItem('theme',document.documentElement.classList.contains('dark')?'dark':'light');applyTheme()}
+    function applyTheme(){const d=localStorage.getItem('theme')==='dark';document.documentElement.classList.toggle('dark',d);document.getElementById('theme-icon').className=d?'bi bi-sun-fill':'bi bi-moon-stars'}
+    function openModal(id){document.getElementById(id).classList.add('active')}
+    function closeModal(id){document.getElementById(id).classList.remove('active');if(id==='scanner-modal')stopScanner()}
+    function navTo(t){if(t==='list')window.scrollTo({top:0,behavior:'smooth'});if(t==='add'){document.getElementById('controls-card').scrollIntoView({behavior:'smooth'});els.input.focus()}if(t==='search'){window.scrollTo({top:0,behavior:'smooth'});els.search.focus()}}
+    function copyTxt(s){const{num}=parseItem(s);navigator.clipboard.writeText(num).then(()=>showToast('কপি হয়েছে','success'))}
+    function copyAll(){const l=(state.data[state.date]&&state.data[state.date][state.shift])||[];if(!l.length)return;navigator.clipboard.writeText(l.map(i=>parseItem(i).num).join('\n')).then(()=>showToast('সব কপি হয়েছে','success'))}
+    function downloadCSV(){const l=(state.data[state.date]&&state.data[state.date][state.shift])||[];if(!l.length)return;let c="Category,Details\n"+l.map(i=>{const{cat,num}=parseItem(i);return`${cat},${num}`}).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([c],{type:'text/csv'}));a.download=`BlastingList_${state.date}.csv`;a.click();closeModal('tools-modal')}
+    function toggleSearchScope(){state.scope=state.scope==='current'?'all':'current';els.scopeBtn.innerText=state.scope==='current'?'বর্তমান':'সব';render()}
+    function shareToWhatsApp(){const l=(state.data[state.date]&&state.data[state.date][state.shift])||[];if(!l.length)return;let m=`🏭 *ব্লাস্টিং লিস্ট*\n📅 ${state.date} (${state.shift=='day'?'দিন':'রাত'})\n\n`;l.forEach(i=>{const{cat,num}=parseItem(i);m+=`▪️ [${cat}] ${num}\n`});window.open(`https://wa.me/?text=${encodeURIComponent(m)}`,'_blank');closeModal('tools-modal')}
+
+    init();
+</script>
+</body>
+</html>
