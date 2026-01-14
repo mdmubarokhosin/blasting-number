@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>স্মার্ট ব্লাস্টিং লিস্ট প্রো</title>
     
+    <!-- Custom Font: July -->
+    <link rel="stylesheet" href="https://cdnmx.pages.dev/assets/fonts/july/font.css">
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Icons -->
@@ -22,7 +25,11 @@
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: { sans: ['ui-sans-serif', 'system-ui', 'Noto Sans Bengali', 'sans-serif'], mono: ['ui-monospace', 'SFMono-Regular', 'monospace'] },
+                    // Added 'July' as the first font in the stack
+                    fontFamily: { 
+                        sans: ['July', 'ui-sans-serif', 'system-ui', 'Noto Sans Bengali', 'sans-serif'], 
+                        mono: ['ui-monospace', 'SFMono-Regular', 'monospace'] 
+                    },
                     colors: {
                         border: "hsl(var(--border))", input: "hsl(var(--input))", ring: "hsl(var(--ring))", background: "hsl(var(--background))", foreground: "hsl(var(--foreground))",
                         primary: { DEFAULT: "hsl(var(--primary))", foreground: "hsl(var(--primary-foreground))" },
@@ -45,7 +52,13 @@
         :root { --radius: 0.5rem; --background: 0 0% 100%; --foreground: 240 10% 3.9%; --card: 0 0% 100%; --card-foreground: 240 10% 3.9%; --primary: 262.1 83.3% 57.8%; --primary-foreground: 210 40% 98%; --muted: 240 4.8% 95.9%; --muted-foreground: 240 3.8% 46.1%; --destructive: 0 84.2% 60.2%; --destructive-foreground: 210 40% 98%; --border: 240 5.9% 90%; --input: 240 5.9% 90%; --ring: 262.1 83.3% 57.8%; }
         .dark { --background: 240 10% 3.9%; --foreground: 0 0% 98%; --card: 240 10% 3.9%; --card-foreground: 0 0% 98%; --primary: 263.4 70% 50.4%; --primary-foreground: 210 40% 98%; --muted: 240 3.7% 15.9%; --muted-foreground: 240 5% 64.9%; --destructive: 0 62.8% 30.6%; --destructive-foreground: 0 0% 98%; --border: 240 3.7% 15.9%; --input: 240 3.7% 15.9%; --ring: 263.4 70% 50.4%; }
         
-        body { background-color: hsl(var(--background)); color: hsl(var(--foreground)); transition: background-color 0.3s ease, color 0.3s ease; }
+        /* Applied Font Family Globally */
+        body { 
+            background-color: hsl(var(--background)); 
+            color: hsl(var(--foreground)); 
+            transition: background-color 0.3s ease, color 0.3s ease;
+            font-family: 'July', system-ui, sans-serif; 
+        }
         
         .shadcn-input { background-color: transparent; border: 1px solid hsl(var(--input)); border-radius: var(--radius); padding: 0.5rem 0.75rem; width: 100%; font-size: 0.875rem; transition: all 0.2s; color: hsl(var(--foreground)); }
         .shadcn-input:focus { outline: none; border-color: hsl(var(--ring)); box-shadow: 0 0 0 2px hsl(var(--ring) / 0.2); }
@@ -77,7 +90,7 @@
         @media (max-width: 640px) { #toast-container { top: 1rem; left: 1rem; right: 1rem; width: auto; max-width: none; } }
     </style>
 </head>
-<body class="min-h-screen pt-20 pb-24 md:pb-10">
+<body class="min-h-screen pt-20 pb-24 md:pb-10 font-sans">
 
 <div id="toast-container"></div>
 
