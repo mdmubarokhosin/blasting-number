@@ -13,7 +13,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Tesseract.js (OCR) -->
     <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
-    <!-- jsPDF & AutoTable (For PDF Generation) -->
+    <!-- jsPDF & AutoTable -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     
@@ -322,7 +322,7 @@
             </div>
             <div id="scan-loading" class="absolute inset-0 bg-black/80 flex flex-col items-center justify-center z-20 hidden">
                 <div class="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mb-3"></div>
-                <p class="text-white text-xs font-mono animate-pulse">হাতের লেখা পড়ার চেষ্টা চলছে...</p>
+                <p class="text-white text-xs font-mono animate-pulse">হাতের লেখা ও খোদাই করা টেক্সট স্ক্যান হচ্ছে...</p>
             </div>
         </div>
         <div class="bg-gray-900 p-6 flex justify-center items-center gap-4">
@@ -488,7 +488,6 @@
 
         const currentList = (state.data[state.date] && state.data[state.date][state.shift]) ? [...state.data[state.date][state.shift]] : [];
         let added = 0;
-        let duplicateDetails = [];
 
         for(let rawEntry of entries) {
             const match = rawEntry.match(/^([a-zA-Z0-9\-]+)(.*)$/);
@@ -501,11 +500,15 @@
                 fullStr = extraPart ? `${codePart}${extraPart}` : codePart;
             }
 
+            // DUPLICATE CHECK
             const exists = checkDuplicate(fullStr);
             if(exists) { 
-                duplicateDetails.push({ num: fullStr, date: exists.d });
-                if(exists.d === state.date) continue; 
+                playSound('error');
+                // The requested message in Bengali: "আপনার এই নাম্বারটি [date] তারিখে যুক্ত করা হয়েছিল"
+                showToast(`আপনার এই নাম্বারটি ${exists.d} তারিখে যুক্ত করা হয়েছিল!`, 'error');
+                continue; // Skip adding this number
             }
+
             const full = `${els.cat.value} ${fullStr}`;
             currentList.push(full); added++;
         }
@@ -518,20 +521,8 @@
             playSound('success');
             await updateRemote(state.date, state.shift, currentList);
             els.input.value = '';
-            
-            const otherDayDups = duplicateDetails.filter(d => d.date !== state.date);
-            if(otherDayDups.length > 0) {
-                 showToast(`${added} টি সফল। (সতর্কতা: ${otherDayDups[0].num} আগে ${otherDayDups[0].date} এ ছিল)`, 'warning');
-            } else {
-                 showToast(`${added} টি সফলভাবে যোগ হয়েছে`, 'success');
-            }
+            showToast(`${added} টি সফলভাবে যোগ হয়েছে`, 'success');
         } 
-        else if(duplicateDetails.length > 0) {
-            playSound('error');
-            const firstDup = duplicateDetails[0];
-            const msg = `এই কোডটি ইতিমধ্যে ${firstDup.date} তারিখে লিস্টি করা হয়েছে!`;
-            showToast(msg, 'error');
-        }
     }
 
     function getCatStyles(cat) {
@@ -696,7 +687,13 @@
         const video = document.getElementById('scan-video');
         try {
             modal.classList.add('active');
-            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+            stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { 
+                    facingMode: "environment",
+                    width: { ideal: 1920 }, // Request higher resolution
+                    height: { ideal: 1080 } 
+                } 
+            });
             video.srcObject = stream;
         } catch (err) {
             console.error(err);
@@ -721,57 +718,101 @@
         const loading = document.getElementById('scan-loading');
         if (!stream) return;
 
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
+        // Draw at higher resolution for better OCR
+        const scale = 2;
+        const w = video.videoWidth * scale;
+        const h = video.videoHeight * scale;
+        
+        canvas.width = w;
+        canvas.height = h;
         const ctx = canvas.getContext('2d');
         
-        ctx.filter = 'contrast(200%) grayscale(100%) brightness(110%)'; 
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        // Draw the image
+        ctx.drawImage(video, 0, 0, w, h);
+        
+        // --- Image Pre-processing for Engraved Text on Metal ---
+        // 1. Get pixel data
+        const d = ctx.getImageData(0, 0, w, h);
+        const data = d.data;
+        
+        // 2. Loop through pixels for thresholding
+        // Engraved text is usually a dark shadow on a lighter rusty surface.
+        // Or sometimes bright scratch on dark. We'll assume Shadow on Surface.
+        // We will do a simple adaptive threshold or high contrast binarization.
+        
+        for (let i = 0; i < data.length; i += 4) {
+            const r = data[i];
+            const g = data[i+1];
+            const b = data[i+2];
+            
+            // Convert to Grayscale (Luminosity)
+            const v = 0.2126*r + 0.7152*g + 0.0722*b;
+            
+            // Threshold logic:
+            // Since rust reduces contrast, we want to separate dark indentations.
+            // If brightness is below a threshold (shadow), make it black. Else white.
+            // A threshold of 100-110 is often good for stamped metal in daylight.
+            // We can also boost contrast mathmatically:
+            // NewVal = (OldVal - 128) * ContrastFactor + 128
+            
+            // Simple Threshold for Engraving:
+            const threshold = 90; // Adjust based on rust darkness. 
+            const bin = (v < threshold) ? 0 : 255;
+            
+            data[i] = bin;
+            data[i+1] = bin;
+            data[i+2] = bin;
+        }
+        
+        ctx.putImageData(d, 0, 0);
         
         loading.classList.remove('hidden');
         
         try {
             const result = await Tesseract.recognize(canvas, 'eng', { 
                 logger: m => console.log(m),
-                tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-=/abcdefghijklmnopqrstuvwxyz '
+                tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789- ' // Allow spaces for "SGP3 A1..."
             });
             
             const text = result.data.text;
             console.log("Raw OCR:", text);
             
-            const pattern = /([A-Z0-9]+-[A-Z0-9]+-[A-Z0-9]+-[A-Z0-9]+)(.*)/i;
-            const lines = text.split('\n');
-            let found = false;
-
-            for(let line of lines) {
-                const match = line.match(pattern);
-                if(match) {
-                    const code = match[1].toUpperCase();
-                    let extra = match[2].trim();
-                    extra = extra.replace(/^[^a-z0-9=\/]+/i, '');
-                    extra = formatExtraText(extra);
-
-                    const finalVal = extra ? `${code} ${extra}` : code;
-                    els.input.value = finalVal;
-                    playSound('success');
-                    showToast(`স্ক্যান হয়েছে: ${finalVal}`, 'success');
-                    stopScanner();
-                    found = true;
-                    break;
-                }
-            }
+            // Clean up: Replace newlines with spaces to handle multiline scanning
+            const cleanText = text.replace(/\n/g, ' ').trim();
             
-            if (!found) {
-                const simpleMatch = text.match(/[A-Z0-9]+-[A-Z0-9]+-[A-Z0-9]+-[A-Z0-9]+/i);
-                if(simpleMatch) {
-                     els.input.value = simpleMatch[0].toUpperCase();
-                     playSound('success');
-                     showToast(`কোড পাওয়া গেছে: ${simpleMatch[0]}`, 'success');
-                     stopScanner();
-                } else {
-                    showToast('কোড অস্পষ্ট। আবার চেষ্টা করুন।', 'warning');
-                    loading.classList.add('hidden');
+            // Flexible Regex for Stamped Text
+            // Matches things like: SGP3 A1 L23 BM 1044
+            // We look for blocks of alphanumeric chars separated by spaces
+            const pattern = /([A-Z0-9]+(?:\s+[A-Z0-9]+)+)/;
+            
+            const match = cleanText.match(pattern);
+            
+            if (match) {
+                // We found a sequence of codes!
+                let rawCode = match[1];
+                
+                // Convert spaces to dashes for ID consistency (SGP3-A1-L23-BM-1044)
+                let formattedCode = rawCode.replace(/\s+/g, '-');
+                
+                // Determine if there is a quantity at the end of the original text
+                // Check original text for "1/2" or "10pcs" style patterns
+                let extra = "";
+                const qtyMatch = cleanText.match(/(\d+\/\d+|\d+\s*pcs|\d+\s*pic)/i);
+                if (qtyMatch) {
+                    extra = qtyMatch[0];
+                    // Remove the qty part from the code if it got merged
+                    formattedCode = formattedCode.replace(new RegExp('-' + extra.replace('/', '-'), 'i'), '');
+                    extra = formatExtraText(extra);
                 }
+
+                const finalVal = extra ? `${formattedCode} ${extra}` : formattedCode;
+                els.input.value = finalVal;
+                playSound('success');
+                showToast(`স্ক্যান হয়েছে: ${finalVal}`, 'success');
+                stopScanner();
+            } else {
+                showToast('কোড অস্পষ্ট। আবার চেষ্টা করুন।', 'warning');
+                loading.classList.add('hidden');
             }
         } catch (err) {
             console.error(err);
