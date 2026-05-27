@@ -12,8 +12,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <!-- Supabase SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Firebase SDK (compat - Realtime Database only, NO Firestore) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
     <!-- Tesseract.js (OCR) -->
     <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
     <!-- jsPDF & AutoTable -->
@@ -25,7 +26,6 @@
             darkMode: 'class',
             theme: {
                 extend: {
-                    // Added 'July' as the first font in the stack
                     fontFamily: { 
                         sans: ['July', 'ui-sans-serif', 'system-ui', 'Noto Sans Bengali', 'sans-serif'], 
                         mono: ['ui-monospace', 'SFMono-Regular', 'monospace'] 
@@ -52,7 +52,6 @@
         :root { --radius: 0.5rem; --background: 0 0% 100%; --foreground: 240 10% 3.9%; --card: 0 0% 100%; --card-foreground: 240 10% 3.9%; --primary: 262.1 83.3% 57.8%; --primary-foreground: 210 40% 98%; --muted: 240 4.8% 95.9%; --muted-foreground: 240 3.8% 46.1%; --destructive: 0 84.2% 60.2%; --destructive-foreground: 210 40% 98%; --border: 240 5.9% 90%; --input: 240 5.9% 90%; --ring: 262.1 83.3% 57.8%; }
         .dark { --background: 240 10% 3.9%; --foreground: 0 0% 98%; --card: 240 10% 3.9%; --card-foreground: 0 0% 98%; --primary: 263.4 70% 50.4%; --primary-foreground: 210 40% 98%; --muted: 240 3.7% 15.9%; --muted-foreground: 240 5% 64.9%; --destructive: 0 62.8% 30.6%; --destructive-foreground: 0 0% 98%; --border: 240 3.7% 15.9%; --input: 240 3.7% 15.9%; --ring: 263.4 70% 50.4%; }
         
-        /* Applied Font Family Globally */
         body { 
             background-color: hsl(var(--background)); 
             color: hsl(var(--foreground)); 
@@ -69,7 +68,6 @@
         .shadcn-btn-outline:hover { background-color: hsl(var(--muted)); }
         .shadcn-card { background-color: hsl(var(--card)); border: 1px solid hsl(var(--border)); border-radius: var(--radius); box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1); }
         
-        /* Animations & Modals */
         @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-enter { animation: slideUp 0.3s ease-out forwards; }
         .modal-overlay { background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity 0.2s ease-in-out; z-index: 60; }
@@ -77,7 +75,6 @@
         .modal-content { transform: scale(0.95) translateY(10px); transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); border: 1px solid hsl(var(--border)); }
         .modal-overlay.active .modal-content { transform: scale(1) translateY(0); }
         
-        /* Toast */
         #toast-container { position: fixed; top: 1.5rem; right: 1.5rem; z-index: 100; display: flex; flex-direction: column; gap: 0.75rem; pointer-events: none; width: 100%; max-width: 380px; }
         .shadcn-toast { pointer-events: auto; display: flex; align-items: start; gap: 0.75rem; background-color: hsl(var(--background)); color: hsl(var(--foreground)); border: 1px solid hsl(var(--border)); padding: 1rem; border-radius: var(--radius); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); font-size: 0.875rem; position: relative; overflow: hidden; }
         .shadcn-toast::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
@@ -162,7 +159,7 @@
                         <input type="text" id="number-input" placeholder="A1-L12-BM-1011 1/2" class="shadcn-input pl-9 font-mono uppercase placeholder:normal-case">
                         <i class="bi bi-box-seam absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"></i>
                     </div>
-                    <button onclick="startScanner()" class="shadcn-btn-outline px-3 text-primary border-primary/30 hover:bg-primary/10" title="ক্যামেরা দিয়ে স্ক্যান করুন">
+                    <button onclick="startScanner()" class="shadcn-btn-outline px-3 text-primary border-primary/30 hover:bg-primary/10" title="ক্যামেরা দিয়ে স্ক্যান করুন">
                         <i class="bi bi-camera-fill"></i>
                     </button>
                 </div>
@@ -347,16 +344,40 @@
 </div>
 
 <script>
+    // ============================================================
+    // অথেনটিকেশন (লগইন)
+    // ============================================================
     const VALID_USERS = { "admin": "12345", "manager": "12345", "shanto": "shanto@123" };
-    
-    const SUPABASE_URL = "https://xrzvjpjqpzndiaatvncd.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_q4H87IB2Ig8Yehl6NLFvcA_B33p7e7y";
 
+    // ============================================================
+    // Firebase Realtime Database কনফিগারেশন (Firestore ব্যবহার নয়)
+    // ============================================================
+    const firebaseConfig = {
+        apiKey: "AIzaSyBZWv9bPTb8rcDGUMrgocpZpGIEUokjdqk",
+        authDomain: "number-lister.firebaseapp.com",
+        databaseURL: "https://number-lister-default-rtdb.firebaseio.com",
+        projectId: "number-lister",
+        storageBucket: "number-lister.firebasestorage.app",
+        messagingSenderId: "603285172555",
+        appId: "1:603285172555:web:0995237556b1f9a36778ce",
+        measurementId: "G-1MW4692TCY"
+    };
+
+    // Firebase ইনিশিয়ালাইজ (শুধু Realtime Database)
     let dbClient = null;
     try {
-        dbClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    } catch(e) { reportError("Supabase Init Failed: " + e.message); }
+        firebase.initializeApp(firebaseConfig);
+        dbClient = firebase.database();
+    } catch(e) { reportError("Firebase Init Failed: " + e.message); }
 
+    // RTDB রেফারেন্স: daily_lists/{date}/{shift}
+    function getListRef(date, shift) {
+        return dbClient.ref('daily_lists/' + date + '/' + shift);
+    }
+
+    // ============================================================
+    // অডিও ফিডব্যাক
+    // ============================================================
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
     function playSound(type) {
         if (audioContext.state === 'suspended') audioContext.resume();
@@ -379,13 +400,16 @@
         }
     }
 
+    // ============================================================
+    // অ্যাপ স্টেট
+    // ============================================================
     let state = {
         isLoggedIn: localStorage.getItem('isLoggedIn') === 'true',
         user: localStorage.getItem('loggedInUser') || '',
         date: new Date().toISOString().split('T')[0],
         shift: 'day',
-        data: {}, 
-        scope: 'current', 
+        data: {},
+        scope: 'current',
     };
 
     const els = {
@@ -403,6 +427,9 @@
         stats: { total: document.getElementById('stat-total'), blasting: document.getElementById('stat-blasting'), dmg: document.getElementById('stat-dmg') }
     };
 
+    // ============================================================
+    // ইনিশিয়ালাইজেশন
+    // ============================================================
     function init() {
         els.date.value = state.date;
         applyTheme();
@@ -438,39 +465,104 @@
         els.errorBox.innerText = "Error: " + msg;
     }
 
-    async function connectDB() {
-        if(!dbClient) return;
-        await fetchData();
-        dbClient.channel('public:daily_lists')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'daily_lists' }, payload => { fetchData(); })
-            .subscribe();
+    // ============================================================
+    // Firebase Realtime Database — কানেক্ট, ফেচ, রিয়েল-টাইম লিসেনার
+    // ============================================================
+
+    /**
+     * connectDB()
+     * Firebase RTDB তে ইনিশিয়াল কানেকশন ও রিয়েল-টাইম লিসেনার সেটআপ।
+     * on('value') ব্যবহার করে সম্পূর্ণ daily_lists ডাটা শোনা হয় —
+     * যেকোনো পরিবর্তনে অটোমেটিক fetchData() কল হয়।
+     */
+    function connectDB() {
+        if (!dbClient) return;
+        
+        // ইনিশিয়াল লোড
+        fetchData();
+        
+        // রিয়েল-টাইম লিসেনার — daily_lists এর যেকোনো পরিবর্তনে ট্রিগার হবে
+        dbClient.ref('daily_lists').on('value', function(snapshot) {
+            processSnapshot(snapshot);
+        }, function(error) {
+            reportError("Realtime listener failed: " + error.message);
+        });
     }
 
-    async function fetchData() {
+    /**
+     * processSnapshot(snapshot)
+     * Firebase snapshot থেকে ডাটা পার্স করে state.data তে লোড করে।
+     * 
+     * Firebase RTDB স্ট্রাকচার:
+     * daily_lists/
+     *   {YYYY-MM-DD}/
+     *     day/
+     *       numbers: ["Blasting A1-L12-BM-1011", ...]
+     *       created_at: "2025-01-01T00:00:00.000Z"
+     *     night/
+     *       numbers: [...]
+     *       created_at: "..."
+     */
+    function processSnapshot(snapshot) {
         try {
-            const { data, error } = await dbClient.from('daily_lists').select('*');
-            if (error) return reportError(error.message);
+            const raw = snapshot.val();
             els.status.className = "flex items-center gap-2 text-xs font-medium px-2 py-1 rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
             els.status.innerHTML = '<span class="w-2 h-2 rounded-full bg-green-500"></span> লাইভ';
             els.errorBox.classList.add('hidden');
+            
             const formattedData = {};
-            if (data) {
-                data.forEach(row => {
-                    if (!formattedData[row.date]) formattedData[row.date] = {};
-                    formattedData[row.date][row.shift] = row.numbers || [];
-                });
+            if (raw) {
+                // raw = { "2025-01-01": { day: { numbers: [...], created_at: "..." }, night: { ... } }, ... }
+                for (let dateKey in raw) {
+                    if (!formattedData[dateKey]) formattedData[dateKey] = {};
+                    const shifts = raw[dateKey];
+                    for (let shiftKey in shifts) {
+                        formattedData[dateKey][shiftKey] = shifts[shiftKey].numbers || [];
+                    }
+                }
             }
             state.data = formattedData;
             render();
-        } catch (err) { reportError("Unexpected: " + err.message); }
+        } catch (err) {
+            reportError("Data processing failed: " + err.message);
+        }
     }
 
+    /**
+     * fetchData()
+     * একবার ম্যানুয়ালি ডাটা ফেচ করার জন্য (প্রাথমিক লোডে ব্যবহৃত)।
+     */
+    async function fetchData() {
+        if (!dbClient) return;
+        try {
+            const snapshot = await dbClient.ref('daily_lists').once('value');
+            processSnapshot(snapshot);
+        } catch (err) {
+            reportError("Initial data load failed: " + err.message);
+        }
+    }
+
+    /**
+     * updateRemote(date, shift, list)
+     * Firebase RTDB তে নির্দিষ্ট তারিখ ও শিফটের ডাটা সেট করে।
+     * set() ব্যবহার করা হয়েছে (যা upsert এর সমতুল্য)।
+     */
     async function updateRemote(date, shift, list) {
-        if(!dbClient) return;
-        const { error } = await dbClient.from('daily_lists').upsert({ date: date, shift: shift, numbers: list }, { onConflict: 'date, shift' });
-        if (error) showToast('সেভ হয়নি: ' + error.message, 'error');
+        if (!dbClient) return;
+        try {
+            const ref = getListRef(date, shift);
+            await ref.set({
+                numbers: list,
+                created_at: new Date().toISOString()
+            });
+        } catch (error) {
+            showToast('সেভ হয়নি: ' + error.message, 'error');
+        }
     }
 
+    // ============================================================
+    // ডুপ্লিকেট চেকার
+    // ============================================================
     function checkDuplicate(numToCheck) {
         for(let d in state.data) {
             for(let s in state.data[d]) {
@@ -491,6 +583,9 @@
         return formatted;
     }
 
+    // ============================================================
+    // নতুন নম্বর যোগ করা
+    // ============================================================
     async function addNumber() {
         if(!state.isLoggedIn) return showToast('লগইন করুন', 'error');
         const val = els.input.value.trim();
@@ -513,13 +608,11 @@
                 fullStr = extraPart ? `${codePart}${extraPart}` : codePart;
             }
 
-            // DUPLICATE CHECK
             const exists = checkDuplicate(fullStr);
             if(exists) { 
                 playSound('error');
-                // The requested message in Bengali: "আপনার এই নাম্বারটি [date] তারিখে যুক্ত করা হয়েছিল"
                 showToast(`আপনার এই নাম্বারটি ${exists.d} তারিখে যুক্ত করা হয়েছিল!`, 'error');
-                continue; // Skip adding this number
+                continue;
             }
 
             const full = `${els.cat.value} ${fullStr}`;
@@ -534,10 +627,13 @@
             playSound('success');
             await updateRemote(state.date, state.shift, currentList);
             els.input.value = '';
-            showToast(`${added} টি সফলভাবে যোগ হয়েছে`, 'success');
+            showToast(`${added} টি সফলভাবে যোগ হয়েছে`, 'success');
         } 
     }
 
+    // ============================================================
+    // UI হেল্পার ফাংশন
+    // ============================================================
     function getCatStyles(cat) {
         switch(cat) {
             case 'Blasting': return { class: 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800', icon: 'bi-box-seam' };
@@ -636,7 +732,9 @@
         }).join('');
     }
 
-    // --- PDF GENERATION FEATURE ---
+    // ============================================================
+    // PDF রিপোর্ট জেনারেটর
+    // ============================================================
     async function downloadPDF() {
         if(!state.isLoggedIn) return showToast('রিপোর্ট ডাউনলোড করতে লগইন করুন', 'error');
         
@@ -646,7 +744,6 @@
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
         
-        // Header
         doc.setFontSize(18);
         doc.text("Blasting Production Report", 14, 20);
         
@@ -655,7 +752,6 @@
         doc.text(`Shift: ${state.shift === 'day' ? 'Day' : 'Night'}`, 14, 35);
         doc.text(`Generated By: ${state.user}`, 14, 40);
 
-        // Stats Summary
         const total = list.length;
         
         doc.setDrawColor(200);
@@ -664,13 +760,11 @@
         doc.text("Summary:", 135, 22);
         doc.text(`Total Items: ${total}`, 135, 28);
 
-        // Table Data Preparation
         const tableBody = list.map((item, index) => {
             const { cat, num } = parseItem(item);
             return [index + 1, cat, num];
         });
 
-        // Generate Table
         doc.autoTable({
             startY: 50,
             head: [['#', 'Category', 'Code / Details']],
@@ -680,19 +774,20 @@
             alternateRowStyles: { fillColor: [240, 240, 240] },
         });
 
-        // Footer / Signature
         const finalY = doc.lastAutoTable.finalY || 60;
         doc.text("_______________________", 140, finalY + 30);
         doc.text("Manager Signature", 145, finalY + 36);
         doc.setFontSize(8);
         doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 285);
 
-        // Save PDF
         doc.save(`Report_${state.date}_${state.shift}.pdf`);
         closeModal('tools-modal');
-        showToast('PDF রিপোর্ট ডাউনলোড হয়েছে', 'success');
+        showToast('PDF রিপোর্ট ডাউনলোড হয়েছে', 'success');
     }
 
+    // ============================================================
+    // OCR ক্যামেরা স্ক্যানার
+    // ============================================================
     let stream = null;
     async function startScanner() {
         if (!state.isLoggedIn) return showToast('স্ক্যান করতে লগইন করুন', 'error');
@@ -703,7 +798,7 @@
             stream = await navigator.mediaDevices.getUserMedia({ 
                 video: { 
                     facingMode: "environment",
-                    width: { ideal: 1920 }, // Request higher resolution
+                    width: { ideal: 1920 }, 
                     height: { ideal: 1080 } 
                 } 
             });
@@ -711,7 +806,7 @@
         } catch (err) {
             console.error(err);
             stopScanner();
-            showToast('ক্যামেরা চালু করা যায়নি', 'error');
+            showToast('ক্যামেরা চালু করা যায়নি (HTTPS প্রয়োজন)', 'error');
         }
     }
 
@@ -731,7 +826,6 @@
         const loading = document.getElementById('scan-loading');
         if (!stream) return;
 
-        // Draw at higher resolution for better OCR
         const scale = 2;
         const w = video.videoWidth * scale;
         const h = video.videoHeight * scale;
@@ -739,81 +833,47 @@
         canvas.width = w;
         canvas.height = h;
         const ctx = canvas.getContext('2d');
-        
-        // Draw the image
         ctx.drawImage(video, 0, 0, w, h);
         
-        // --- Image Pre-processing for Engraved Text on Metal ---
-        // 1. Get pixel data
         const d = ctx.getImageData(0, 0, w, h);
         const data = d.data;
-        
-        // 2. Loop through pixels for thresholding
-        // Engraved text is usually a dark shadow on a lighter rusty surface.
-        // Or sometimes bright scratch on dark. We'll assume Shadow on Surface.
-        // We will do a simple adaptive threshold or high contrast binarization.
         
         for (let i = 0; i < data.length; i += 4) {
             const r = data[i];
             const g = data[i+1];
             const b = data[i+2];
-            
-            // Convert to Grayscale (Luminosity)
             const v = 0.2126*r + 0.7152*g + 0.0722*b;
-            
-            // Threshold logic:
-            // Since rust reduces contrast, we want to separate dark indentations.
-            // If brightness is below a threshold (shadow), make it black. Else white.
-            // A threshold of 100-110 is often good for stamped metal in daylight.
-            // We can also boost contrast mathmatically:
-            // NewVal = (OldVal - 128) * ContrastFactor + 128
-            
-            // Simple Threshold for Engraving:
-            const threshold = 90; // Adjust based on rust darkness. 
+            const threshold = 90;
             const bin = (v < threshold) ? 0 : 255;
-            
             data[i] = bin;
             data[i+1] = bin;
             data[i+2] = bin;
         }
         
         ctx.putImageData(d, 0, 0);
-        
         loading.classList.remove('hidden');
         
         try {
             const result = await Tesseract.recognize(canvas, 'eng', { 
                 logger: m => console.log(m),
-                tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789- ' // Allow spaces for "SGP3 A1..."
+                tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789- ' 
             });
             
             const text = result.data.text;
             console.log("Raw OCR:", text);
             
-            // Clean up: Replace newlines with spaces to handle multiline scanning
             const cleanText = text.replace(/\n/g, ' ').trim();
-            
-            // Flexible Regex for Stamped Text
-            // Matches things like: SGP3 A1 L23 BM 1044
-            // We look for blocks of alphanumeric chars separated by spaces
             const pattern = /([A-Z0-9]+(?:\s+[A-Z0-9]+)+)/;
-            
             const match = cleanText.match(pattern);
             
             if (match) {
-                // We found a sequence of codes!
                 let rawCode = match[1];
-                
-                // Convert spaces to dashes for ID consistency (SGP3-A1-L23-BM-1044)
                 let formattedCode = rawCode.replace(/\s+/g, '-');
                 
-                // Determine if there is a quantity at the end of the original text
-                // Check original text for "1/2" or "10pcs" style patterns
                 let extra = "";
                 const qtyMatch = cleanText.match(/(\d+\/\d+|\d+\s*pcs|\d+\s*pic)/i);
                 if (qtyMatch) {
                     extra = qtyMatch[0];
-                    // Remove the qty part from the code if it got merged
                     formattedCode = formattedCode.replace(new RegExp('-' + extra.replace('/', '-'), 'i'), '');
                     extra = formatExtraText(extra);
                 }
@@ -821,7 +881,7 @@
                 const finalVal = extra ? `${formattedCode} ${extra}` : formattedCode;
                 els.input.value = finalVal;
                 playSound('success');
-                showToast(`স্ক্যান হয়েছে: ${finalVal}`, 'success');
+                showToast(`স্ক্যান হয়েছে: ${finalVal}`, 'success');
                 stopScanner();
             } else {
                 showToast('কোড অস্পষ্ট। আবার চেষ্টা করুন।', 'warning');
@@ -834,7 +894,11 @@
         }
     }
 
+    // ============================================================
+    // ইউটিলিটি ফাংশন
+    // ============================================================
     function parseItem(str) { const parts = str.split(' '); return { cat: parts[0], num: parts.slice(1).join(' ') }; }
+
     function showToast(msg, type = 'default') {
         const container = document.getElementById('toast-container');
         const icons = { success: '<i class="bi bi-check-circle-fill text-green-500"></i>', error: '<i class="bi bi-x-circle-fill text-red-500"></i>', warning: '<i class="bi bi-exclamation-triangle-fill text-yellow-500"></i>', default: '<i class="bi bi-info-circle-fill text-blue-500"></i>' };
@@ -844,9 +908,30 @@
     }
     
     function openConfirm(t,m){return new Promise(r=>{const el=document.getElementById('confirm-modal');document.getElementById('confirm-title').innerText=t;document.getElementById('confirm-desc').innerText=m;el.classList.add('active');const ok=()=>{c();r(true)};const no=()=>{c();r(false)};const c=()=>{document.getElementById('confirm-ok').removeEventListener('click',ok);document.getElementById('confirm-cancel').removeEventListener('click',no);el.classList.remove('active')};document.getElementById('confirm-ok').addEventListener('click',ok);document.getElementById('confirm-cancel').addEventListener('click',no)})}
-    async function delItem(str){if(await openConfirm('মুছে ফেলবেন?','এই আইটেমটি পারমানেন্টলি ডিলিট হবে।')){const l=state.data[state.date][state.shift].filter(i=>i!==str);state.data[state.date][state.shift]=l;render();await updateRemote(state.date,state.shift,l);showToast('ডিলিট হয়েছে','success')}}
-    function openEdit(str){const {cat,num}=parseItem(str);document.getElementById('edit-original').value=str;document.getElementById('edit-cat').value=cat;document.getElementById('edit-num').value=num;openModal('edit-modal')}
-    async function saveEdit(){const o=document.getElementById('edit-original').value,nc=document.getElementById('edit-cat').value,nn=document.getElementById('edit-num').value.trim();if(!nn)return;
+
+    async function delItem(str){
+        if(await openConfirm('মুছে ফেলবেন?','এই আইটেমটি পারমানেন্টলি ডিলিট হবে।')){
+            const l=state.data[state.date][state.shift].filter(i=>i!==str);
+            state.data[state.date][state.shift]=l;
+            render();
+            await updateRemote(state.date,state.shift,l);
+            showToast('ডিলিট হয়েছে','success');
+        }
+    }
+
+    function openEdit(str){
+        const {cat,num}=parseItem(str);
+        document.getElementById('edit-original').value=str;
+        document.getElementById('edit-cat').value=cat;
+        document.getElementById('edit-num').value=num;
+        openModal('edit-modal');
+    }
+
+    async function saveEdit(){
+        const o=document.getElementById('edit-original').value;
+        const nc=document.getElementById('edit-cat').value;
+        const nn=document.getElementById('edit-num').value.trim();
+        if(!nn) return;
         let formattedNum = nn;
         const match = nn.match(/^([a-zA-Z0-9\-]+)(.*)$/);
         if (match) {
@@ -855,22 +940,126 @@
              ep = formatExtraText(ep);
              formattedNum = ep ? `${cp}${ep}` : cp;
         }
+        const l=[...state.data[state.date][state.shift]];
+        const i=l.indexOf(o);
+        if(i>-1){
+            l[i]=`${nc} ${formattedNum}`;
+            state.data[state.date][state.shift]=l;
+            render();
+            await updateRemote(state.date,state.shift,l);
+            showToast('আপডেট হয়েছে','success');
+            closeModal('edit-modal');
+        }
+    }
 
-        const l=[...state.data[state.date][state.shift]],i=l.indexOf(o);if(i>-1){l[i]=`${nc} ${formattedNum}`;state.data[state.date][state.shift]=l;render();await updateRemote(state.date,state.shift,l);showToast('আপডেট হয়েছে','success');closeModal('edit-modal')}}
-    function login(){const u=document.getElementById('username').value,p=document.getElementById('password').value;if(VALID_USERS[u]===p){state.isLoggedIn=true;state.user=u;localStorage.setItem('isLoggedIn','true');localStorage.setItem('loggedInUser',u);updateAuth();closeModal('settings-modal');showToast('লগইন সফল','success')}else showToast('ভুল তথ্য','error')}
-    function logout(){state.isLoggedIn=false;localStorage.removeItem('isLoggedIn');updateAuth();closeModal('settings-modal');}
-    function updateAuth(){els.addBtn.disabled=!state.isLoggedIn;document.getElementById('add-section').classList.toggle('opacity-50',!state.isLoggedIn);document.getElementById('add-section').classList.toggle('pointer-events-none',!state.isLoggedIn);document.getElementById('auth-message').classList.toggle('hidden',state.isLoggedIn);document.getElementById('login-form').classList.toggle('hidden',state.isLoggedIn);document.getElementById('profile-info').classList.toggle('hidden',!state.isLoggedIn);if(state.isLoggedIn)document.getElementById('user-display').innerText=state.user;render()}
-    function toggleTheme(){document.documentElement.classList.toggle('dark');localStorage.setItem('theme',document.documentElement.classList.contains('dark')?'dark':'light');applyTheme()}
-    function applyTheme(){const d=localStorage.getItem('theme')==='dark';document.documentElement.classList.toggle('dark',d);document.getElementById('theme-icon').className=d?'bi bi-sun-fill':'bi bi-moon-stars'}
+    // ============================================================
+    // লগইন / লগআউট
+    // ============================================================
+    function login(){
+        const u=document.getElementById('username').value;
+        const p=document.getElementById('password').value;
+        if(VALID_USERS[u]===p){
+            state.isLoggedIn=true;
+            state.user=u;
+            localStorage.setItem('isLoggedIn','true');
+            localStorage.setItem('loggedInUser',u);
+            updateAuth();
+            closeModal('settings-modal');
+            showToast('লগইন সফল','success');
+        } else {
+            showToast('ভুল তথ্য','error');
+        }
+    }
+
+    function logout(){
+        state.isLoggedIn=false;
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('loggedInUser');
+        updateAuth();
+        closeModal('settings-modal');
+    }
+
+    function updateAuth(){
+        els.addBtn.disabled=!state.isLoggedIn;
+        document.getElementById('add-section').classList.toggle('opacity-50',!state.isLoggedIn);
+        document.getElementById('add-section').classList.toggle('pointer-events-none',!state.isLoggedIn);
+        document.getElementById('auth-message').classList.toggle('hidden',state.isLoggedIn);
+        document.getElementById('login-form').classList.toggle('hidden',state.isLoggedIn);
+        document.getElementById('profile-info').classList.toggle('hidden',!state.isLoggedIn);
+        if(state.isLoggedIn) document.getElementById('user-display').innerText=state.user;
+        render();
+    }
+
+    // ============================================================
+    // থিম টগল
+    // ============================================================
+    function toggleTheme(){
+        document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme',document.documentElement.classList.contains('dark')?'dark':'light');
+        applyTheme();
+    }
+
+    function applyTheme(){
+        const d=localStorage.getItem('theme')==='dark';
+        document.documentElement.classList.toggle('dark',d);
+        document.getElementById('theme-icon').className=d?'bi bi-sun-fill':'bi bi-moon-stars';
+    }
+
+    // ============================================================
+    // মোডাল ও ন্যাভিগেশন
+    // ============================================================
     function openModal(id){document.getElementById(id).classList.add('active')}
     function closeModal(id){document.getElementById(id).classList.remove('active');if(id==='scanner-modal')stopScanner()}
-    function navTo(t){if(t==='list')window.scrollTo({top:0,behavior:'smooth'});if(t==='add'){document.getElementById('controls-card').scrollIntoView({behavior:'smooth'});els.input.focus()}if(t==='search'){window.scrollTo({top:0,behavior:'smooth'});els.search.focus()}}
-    function copyTxt(s){const{num}=parseItem(s);navigator.clipboard.writeText(num).then(()=>showToast('কপি হয়েছে','success'))}
-    function copyAll(){const l=(state.data[state.date]&&state.data[state.date][state.shift])||[];if(!l.length)return;navigator.clipboard.writeText(l.map(i=>parseItem(i).num).join('\n')).then(()=>showToast('সব কপি হয়েছে','success'))}
-    function downloadCSV(){const l=(state.data[state.date]&&state.data[state.date][state.shift])||[];if(!l.length)return;let c="Category,Details\n"+l.map(i=>{const{cat,num}=parseItem(i);return`${cat},${num}`}).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([c],{type:'text/csv'}));a.download=`BlastingList_${state.date}.csv`;a.click();closeModal('tools-modal')}
-    function toggleSearchScope(){state.scope=state.scope==='current'?'all':'current';els.scopeBtn.innerText=state.scope==='current'?'বর্তমান':'সব';render()}
-    function shareToWhatsApp(){const l=(state.data[state.date]&&state.data[state.date][state.shift])||[];if(!l.length)return;let m=`🏭 *ব্লাস্টিং লিস্ট*\n📅 ${state.date} (${state.shift=='day'?'দিন':'রাত'})\n\n`;l.forEach(i=>{const{cat,num}=parseItem(i);m+=`▪️ [${cat}] ${num}\n`});window.open(`https://wa.me/?text=${encodeURIComponent(m)}`,'_blank');closeModal('tools-modal')}
 
+    function navTo(t){
+        if(t==='list') window.scrollTo({top:0,behavior:'smooth'});
+        if(t==='add'){document.getElementById('controls-card').scrollIntoView({behavior:'smooth'});els.input.focus()}
+        if(t==='search'){window.scrollTo({top:0,behavior:'smooth'});els.search.focus()}
+    }
+
+    // ============================================================
+    // কপি, CSV, WhatsApp শেয়ার
+    // ============================================================
+    function copyTxt(s){
+        const{num}=parseItem(s);
+        navigator.clipboard.writeText(num).then(()=>showToast('কপি হয়েছে','success'));
+    }
+
+    function copyAll(){
+        const l=(state.data[state.date]&&state.data[state.date][state.shift])||[];
+        if(!l.length) return;
+        navigator.clipboard.writeText(l.map(i=>parseItem(i).num).join('\n')).then(()=>showToast('সব কপি হয়েছে','success'));
+    }
+
+    function downloadCSV(){
+        const l=(state.data[state.date]&&state.data[state.date][state.shift])||[];
+        if(!l.length) return;
+        let c="Category,Details\n"+l.map(i=>{const{cat,num}=parseItem(i);return`"${cat}","${num}"`}).join('\n');
+        const a=document.createElement('a');
+        a.href=URL.createObjectURL(new Blob([c],{type:'text/csv'}));
+        a.download=`BlastingList_${state.date}.csv`;
+        a.click();
+        closeModal('tools-modal');
+    }
+
+    function toggleSearchScope(){
+        state.scope=state.scope==='current'?'all':'current';
+        els.scopeBtn.innerText=state.scope==='current'?'বর্তমান':'সব';
+        render();
+    }
+
+    function shareToWhatsApp(){
+        const l=(state.data[state.date]&&state.data[state.date][state.shift])||[];
+        if(!l.length) return;
+        let m=`🏭 *ব্লাস্টিং লিস্ট*\n📅 ${state.date} (${state.shift=='day'?'দিন':'রাত'})\n\n`;
+        l.forEach(i=>{const{cat,num}=parseItem(i);m+=`▪️ [${cat}] ${num}\n`});
+        window.open(`https://wa.me/?text=${encodeURIComponent(m)}`,'_blank');
+        closeModal('tools-modal');
+    }
+
+    // ============================================================
+    // অ্যাপ শুরু
+    // ============================================================
     init();
 </script>
 </body>
