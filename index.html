@@ -12,7 +12,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <!-- Firebase SDK (compat - Realtime Database only, NO Firestore) -->
+    <!-- Firebase SDK (compat for simple HTML usage) -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
     <!-- Tesseract.js (OCR) -->
@@ -36,12 +36,14 @@
                         destructive: { DEFAULT: "hsl(var(--destructive))", foreground: "hsl(var(--destructive-foreground))" },
                         muted: { DEFAULT: "hsl(var(--muted))", foreground: "hsl(var(--muted-foreground))" },
                         card: { DEFAULT: "hsl(var(--card))", foreground: "hsl(var(--card-foreground))" },
+                        accent: { DEFAULT: "hsl(var(--accent))", foreground: "hsl(var(--accent-foreground))" },
                     },
                     borderRadius: { lg: "var(--radius)", md: "calc(var(--radius) - 2px)", sm: "calc(var(--radius) - 4px)" },
                     animation: { 
                         'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                         'toast-enter': 'toast-slide-in 0.25s ease-out forwards',
                         'toast-exit': 'toast-swipe-out 0.2s ease-in forwards',
+                        'spin-slow': 'spin 3s linear infinite',
                     }
                 }
             }
@@ -49,8 +51,27 @@
     </script>
 
     <style>
-        :root { --radius: 0.5rem; --background: 0 0% 100%; --foreground: 240 10% 3.9%; --card: 0 0% 100%; --card-foreground: 240 10% 3.9%; --primary: 262.1 83.3% 57.8%; --primary-foreground: 210 40% 98%; --muted: 240 4.8% 95.9%; --muted-foreground: 240 3.8% 46.1%; --destructive: 0 84.2% 60.2%; --destructive-foreground: 210 40% 98%; --border: 240 5.9% 90%; --input: 240 5.9% 90%; --ring: 262.1 83.3% 57.8%; }
-        .dark { --background: 240 10% 3.9%; --foreground: 0 0% 98%; --card: 240 10% 3.9%; --card-foreground: 0 0% 98%; --primary: 263.4 70% 50.4%; --primary-foreground: 210 40% 98%; --muted: 240 3.7% 15.9%; --muted-foreground: 240 5% 64.9%; --destructive: 0 62.8% 30.6%; --destructive-foreground: 0 0% 98%; --border: 240 3.7% 15.9%; --input: 240 3.7% 15.9%; --ring: 263.4 70% 50.4%; }
+        :root { 
+            --radius: 0.5rem; 
+            --background: 0 0% 100%; --foreground: 240 10% 3.9%; 
+            --card: 0 0% 100%; --card-foreground: 240 10% 3.9%; 
+            --primary: 262.1 83.3% 57.8%; --primary-foreground: 210 40% 98%; 
+            --muted: 240 4.8% 95.9%; --muted-foreground: 240 3.8% 46.1%; 
+            --destructive: 0 84.2% 60.2%; --destructive-foreground: 210 40% 98%; 
+            --border: 240 5.9% 90%; --input: 240 5.9% 90%; 
+            --ring: 262.1 83.3% 57.8%; 
+            --accent: 47.9 95.8% 53.1%; --accent-foreground: 26 83.3% 14.1%;
+        }
+        .dark { 
+            --background: 240 10% 3.9%; --foreground: 0 0% 98%; 
+            --card: 240 10% 3.9%; --card-foreground: 0 0% 98%; 
+            --primary: 263.4 70% 50.4%; --primary-foreground: 210 40% 98%; 
+            --muted: 240 3.7% 15.9%; --muted-foreground: 240 5% 64.9%; 
+            --destructive: 0 62.8% 30.6%; --destructive-foreground: 0 0% 98%; 
+            --border: 240 3.7% 15.9%; --input: 240 3.7% 15.9%; 
+            --ring: 263.4 70% 50.4%; 
+            --accent: 47.9 95.8% 53.1%; --accent-foreground: 26 83.3% 14.1%;
+        }
         
         body { 
             background-color: hsl(var(--background)); 
@@ -61,11 +82,12 @@
         
         .shadcn-input { background-color: transparent; border: 1px solid hsl(var(--input)); border-radius: var(--radius); padding: 0.5rem 0.75rem; width: 100%; font-size: 0.875rem; transition: all 0.2s; color: hsl(var(--foreground)); }
         .shadcn-input:focus { outline: none; border-color: hsl(var(--ring)); box-shadow: 0 0 0 2px hsl(var(--ring) / 0.2); }
-        .shadcn-btn { background-color: hsl(var(--primary)); color: hsl(var(--primary-foreground)); font-weight: 500; border-radius: var(--radius); padding: 0.5rem 1rem; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; }
+        .shadcn-btn { background-color: hsl(var(--primary)); color: hsl(var(--primary-foreground)); font-weight: 500; border-radius: var(--radius); padding: 0.5rem 1rem; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; border: none; }
         .shadcn-btn:hover:not(:disabled) { opacity: 0.9; } .shadcn-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .shadcn-btn-destructive { background-color: hsl(var(--destructive)); color: hsl(var(--destructive-foreground)); font-weight: 500; border-radius: var(--radius); padding: 0.5rem 1rem; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; }
-        .shadcn-btn-outline { background-color: transparent; border: 1px solid hsl(var(--border)); color: hsl(var(--foreground)); font-weight: 500; border-radius: var(--radius); padding: 0.5rem 1rem; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; }
+        .shadcn-btn-destructive { background-color: hsl(var(--destructive)); color: hsl(var(--destructive-foreground)); font-weight: 500; border-radius: var(--radius); padding: 0.5rem 1rem; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; border: none; }
+        .shadcn-btn-outline { background-color: transparent; border: 1px solid hsl(var(--border)); color: hsl(var(--foreground)); font-weight: 500; border-radius: var(--radius); padding: 0.5rem 1rem; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
         .shadcn-btn-outline:hover { background-color: hsl(var(--muted)); }
+        .shadcn-btn-accent { background-color: hsl(var(--accent)); color: hsl(var(--accent-foreground)); font-weight: 500; border-radius: var(--radius); padding: 0.5rem 1rem; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; border: none; }
         .shadcn-card { background-color: hsl(var(--card)); border: 1px solid hsl(var(--border)); border-radius: var(--radius); box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1); }
         
         @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -83,7 +105,21 @@
         @keyframes toast-swipe-out { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(100%); } }
 
         .highlight { background-color: rgba(253, 224, 71, 0.4); color: inherit; padding: 0 2px; border-radius: 2px; }
-        @media print { body { background: white; color: black; } header, #mobile-nav, #controls-card, .no-print { display: none !important; } #list-container { border: none; box-shadow: none; } }
+
+        /* Admin Panel Styles */
+        .admin-sidebar-item { transition: all 0.15s; }
+        .admin-sidebar-item:hover { background-color: hsl(var(--muted)); }
+        .admin-sidebar-item.active { background-color: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
+        .admin-stat-card { transition: transform 0.15s; }
+        .admin-stat-card:hover { transform: translateY(-2px); }
+        .admin-table-row:hover { background-color: hsl(var(--muted) / 0.5); }
+        .badge { display: inline-flex; align-items: center; padding: 0.125rem 0.5rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; }
+        .badge-admin { background-color: hsl(var(--primary) / 0.15); color: hsl(var(--primary)); }
+        .badge-user { background-color: hsl(var(--accent) / 0.15); color: hsl(var(--accent-foreground)); }
+        .badge-active { background-color: rgba(34, 197, 94, 0.15); color: #16a34a; }
+        .badge-inactive { background-color: rgba(239, 68, 68, 0.15); color: #dc2626; }
+
+        @media print { body { background: white; color: black; } header, #mobile-nav, #controls-card, .no-print { display: none !important; } }
         @media (max-width: 640px) { #toast-container { top: 1rem; left: 1rem; right: 1rem; width: auto; max-width: none; } }
     </style>
 </head>
@@ -91,27 +127,31 @@
 
 <div id="toast-container"></div>
 
-<!-- Header -->
-<header class="fixed top-0 inset-x-0 bg-background/80 backdrop-blur-md border-b border-border z-40 h-16 flex items-center justify-between px-4 lg:px-8">
+<!-- ==================== HEADER ==================== -->
+<header id="app-header" class="fixed top-0 inset-x-0 bg-background/80 backdrop-blur-md border-b border-border z-40 h-16 flex items-center justify-between px-4 lg:px-8">
     <div class="flex items-center gap-2">
         <div class="w-8 h-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-bold shadow">
             <i class="bi bi-box-seam-fill"></i>
         </div>
         <h1 class="font-bold text-lg tracking-tight">ব্লাস্টিং তালিকা</h1>
     </div>
-    <div class="flex gap-2">
+    <div class="flex gap-2 items-center">
+        <button id="admin-header-btn" onclick="showPage('admin')" class="hidden w-9 h-9 rounded-full border border-border flex items-center justify-center hover:bg-muted transition-colors text-primary" title="অ্যাডমিন প্যানেল">
+            <i class="bi bi-shield-lock-fill"></i>
+        </button>
         <button onclick="toggleTheme()" class="w-9 h-9 rounded-full border border-border flex items-center justify-center hover:bg-muted transition-colors">
             <i id="theme-icon" class="bi bi-moon-stars"></i>
         </button>
     </div>
 </header>
 
-<main class="max-w-4xl mx-auto px-4 py-4">
+<!-- ==================== MAIN APP PAGE ==================== -->
+<main id="main-page" class="max-w-4xl mx-auto px-4 py-4">
     <!-- Control Card -->
     <div id="controls-card" class="shadcn-card p-5 mb-6">
         <div class="flex justify-between items-center mb-4">
             <span class="text-xs font-bold uppercase text-muted-foreground tracking-wider">কন্ট্রোল প্যানেল</span>
-            <div id="connection-status" class="flex items-center gap-2 text-xs font-medium px-2 py-1 rounded-full bg-yellow-100 text-yellow-800 cursor-pointer" onclick="showToast(this.title, 'default')" title="ডাটাবেস স্ট্যাটাস">
+            <div id="connection-status" class="flex items-center gap-2 text-xs font-medium px-2 py-1 rounded-full bg-yellow-100 text-yellow-800 cursor-pointer" title="ডাটাবেস স্ট্যাটাস">
                 <span class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></span> সংযোগ হচ্ছে...
             </div>
         </div>
@@ -143,7 +183,7 @@
             </div>
         </div>
 
-        <!-- Add Section with Improved Scanner -->
+        <!-- Add Section -->
         <div id="add-section" class="pt-4 border-t border-border">
             <label class="block text-xs font-medium mb-1.5 text-muted-foreground">নতুন কোড (যেমন: A1-L12-BM-1011 1/2)</label>
             <div class="flex flex-col sm:flex-row gap-2">
@@ -153,7 +193,6 @@
                     <option value="Damaged">Damaged</option>
                     <option value="Return">Return</option>
                 </select>
-                <!-- Input Group with Scanner Button -->
                 <div class="relative flex-1 flex gap-1">
                     <div class="relative flex-1">
                         <input type="text" id="number-input" placeholder="A1-L12-BM-1011 1/2" class="shadcn-input pl-9 font-mono uppercase placeholder:normal-case">
@@ -208,17 +247,55 @@
 
     <!-- List -->
     <ul id="numbers-list" class="space-y-3 pb-4 min-h-[200px]">
-        <!-- Skeleton -->
         <li class="animate-pulse bg-muted/50 rounded-lg p-4 h-16 border border-border"></li>
     </ul>
 </main>
 
-<!-- Mobile Nav -->
+<!-- ==================== ADMIN PANEL PAGE ==================== -->
+<div id="admin-page" class="hidden min-h-screen pt-20 pb-8">
+    <div class="max-w-6xl mx-auto px-4 py-4">
+        <!-- Admin Header -->
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h2 class="text-2xl font-bold flex items-center gap-2"><i class="bi bi-shield-lock-fill text-primary"></i> অ্যাডমিন প্যানেল</h2>
+                <p class="text-sm text-muted-foreground mt-1">সকল সেটিংস ও ইউজার ম্যানেজমেন্ট</p>
+            </div>
+            <button onclick="showPage('main')" class="shadcn-btn-outline flex items-center gap-2">
+                <i class="bi bi-arrow-left"></i> মূল পেজে ফিরুন
+            </button>
+        </div>
+
+        <!-- Admin Nav Tabs -->
+        <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
+            <button onclick="showAdminTab('dashboard')" id="tab-dashboard" class="admin-tab shadcn-btn text-xs whitespace-nowrap">
+                <i class="bi bi-speedometer2 mr-1"></i> ড্যাশবোর্ড
+            </button>
+            <button onclick="showAdminTab('users')" id="tab-users" class="admin-tab shadcn-btn-outline text-xs whitespace-nowrap">
+                <i class="bi bi-people mr-1"></i> ইউজার ম্যানেজমেন্ট
+            </button>
+            <button onclick="showAdminTab('data')" id="tab-data" class="admin-tab shadcn-btn-outline text-xs whitespace-nowrap">
+                <i class="bi bi-database mr-1"></i> ডাটা ম্যানেজমেন্ট
+            </button>
+            <button onclick="showAdminTab('logs')" id="tab-logs" class="admin-tab shadcn-btn-outline text-xs whitespace-nowrap">
+                <i class="bi bi-journal-text mr-1"></i> অ্যাক্টিভিটি লগ
+            </button>
+        </div>
+
+        <!-- Admin Content Area -->
+        <div id="admin-content">
+            <!-- Dynamic content loaded here -->
+        </div>
+    </div>
+</div>
+
+<!-- ==================== MOBILE NAV ==================== -->
 <div id="mobile-nav" class="fixed bottom-0 inset-x-0 bg-background/90 backdrop-blur border-t border-border h-[65px] z-50 lg:hidden flex justify-around items-center">
     <button onclick="navTo('list')" class="flex flex-col items-center gap-1 p-2 text-primary"><i class="bi bi-list-ul text-xl"></i><span class="text-[10px]">লিস্ট</span></button>
     <button onclick="navTo('add')" class="flex flex-col items-center gap-1 p-2 text-muted-foreground hover:text-primary"><i class="bi bi-plus-circle text-xl"></i><span class="text-[10px]">যোগ</span></button>
     <button onclick="openModal('settings-modal')" class="flex flex-col items-center gap-1 p-2 text-muted-foreground hover:text-primary"><i class="bi bi-gear text-xl"></i><span class="text-[10px]">সেটিংস</span></button>
 </div>
+
+<!-- ==================== MODALS ==================== -->
 
 <!-- Confirmation Modal -->
 <div id="confirm-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4">
@@ -283,7 +360,7 @@
     </div>
 </div>
 
-<!-- Settings Modal -->
+<!-- Settings / Login Modal -->
 <div id="settings-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4">
     <div class="modal-content bg-card w-full max-w-sm rounded-xl p-6 shadow-2xl border border-border">
         <div class="flex justify-between items-center mb-6">
@@ -293,23 +370,88 @@
         <div id="login-form" class="space-y-3">
             <div class="space-y-1">
                 <label class="text-xs font-medium text-muted-foreground">ইউজারনেম</label>
-                <input type="text" id="username" class="shadcn-input">
+                <input type="text" id="username" class="shadcn-input" placeholder="ইউজারনেম লিখুন">
             </div>
             <div class="space-y-1">
                  <label class="text-xs font-medium text-muted-foreground">পাসওয়ার্ড</label>
-                <input type="password" id="password" class="shadcn-input">
+                <input type="password" id="password" class="shadcn-input" placeholder="পাসওয়ার্ড লিখুন">
             </div>
             <button onclick="login()" class="shadcn-btn w-full mt-2">লগইন</button>
         </div>
         <div id="profile-info" class="hidden text-center">
             <div class="w-20 h-20 bg-primary/10 rounded-full mx-auto flex items-center justify-center text-4xl text-primary mb-4 ring-4 ring-primary/5"><i class="bi bi-shield-check"></i></div>
             <p class="font-bold text-lg">ব্লাস্টিং ম্যানেজার</p>
-            <p id="user-display" class="text-sm text-muted-foreground mb-6"></p>
+            <p id="user-display" class="text-sm text-muted-foreground mb-1"></p>
+            <p id="user-role-display" class="text-xs text-primary font-bold mb-6"></p>
             <div class="grid grid-cols-2 gap-3 mt-4">
                 <button onclick="openModal('tools-modal')" class="py-2.5 bg-muted text-foreground rounded-md text-xs font-bold hover:bg-muted/80 transition-colors">টুলস</button>
                 <button onclick="logout()" class="py-2.5 bg-destructive text-destructive-foreground rounded-md text-xs font-bold hover:opacity-90 transition-opacity">লগআউট</button>
             </div>
+            <div id="admin-panel-btn-container" class="hidden mt-3">
+                <button onclick="closeModal('settings-modal');showPage('admin')" class="w-full py-2.5 bg-primary text-primary-foreground rounded-md text-xs font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
+                    <i class="bi bi-shield-lock-fill"></i> অ্যাডমিন প্যানেল
+                </button>
+            </div>
         </div>
+    </div>
+</div>
+
+<!-- Admin: Create/Edit User Modal -->
+<div id="admin-user-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4">
+    <div class="modal-content bg-card w-full max-w-sm rounded-xl p-6 shadow-2xl border border-border">
+        <div class="flex justify-between items-center mb-6">
+            <h3 id="admin-user-modal-title" class="font-bold text-lg tracking-tight">নতুন ইউজার তৈরি করুন</h3>
+            <button onclick="closeModal('admin-user-modal')" class="w-8 h-8 rounded-full hover:bg-muted flex items-center justify-center transition-colors"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <input type="hidden" id="admin-edit-user-key">
+        <div class="space-y-3">
+            <div class="space-y-1">
+                <label class="text-xs font-medium text-muted-foreground">ইউজারনেম <span class="text-destructive">*</span></label>
+                <input type="text" id="admin-new-username" class="shadcn-input" placeholder="ইউজারনেম (ইংরেজিতে)">
+                <p class="text-[10px] text-muted-foreground">শুধুমাত্র ছোট হাতের ইংরেজি অক্ষর ও সংখ্যা</p>
+            </div>
+            <div class="space-y-1">
+                <label class="text-xs font-medium text-muted-foreground">প্রদর্শন নাম</label>
+                <input type="text" id="admin-new-displayname" class="shadcn-input" placeholder="প্রদর্শন নাম">
+            </div>
+            <div class="space-y-1">
+                <label class="text-xs font-medium text-muted-foreground">পাসওয়ার্ড <span class="text-destructive">*</span></label>
+                <div class="relative">
+                    <input type="password" id="admin-new-password" class="shadcn-input pr-10" placeholder="পাসওয়ার্ড">
+                    <button type="button" onclick="togglePasswordVisibility('admin-new-password', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="space-y-1">
+                <label class="text-xs font-medium text-muted-foreground">ভূমিকা (Role)</label>
+                <select id="admin-new-role" class="shadcn-input bg-background">
+                    <option value="user">সাধারণ ইউজার</option>
+                    <option value="admin">অ্যাডমিন</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-2">
+                <input type="checkbox" id="admin-new-active" checked class="w-4 h-4 rounded accent-primary">
+                <label for="admin-new-active" class="text-xs font-medium text-muted-foreground cursor-pointer">সক্রিয় (Active)</label>
+            </div>
+        </div>
+        <div class="flex gap-3 mt-6">
+            <button onclick="closeModal('admin-user-modal')" class="flex-1 py-2 rounded-md border border-border text-sm font-medium hover:bg-muted transition-colors">বাতিল</button>
+            <button onclick="saveAdminUser()" class="flex-1 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity">
+                <i class="bi bi-check-lg mr-1"></i> সেভ করুন
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Admin: View Date Data Modal -->
+<div id="admin-data-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4">
+    <div class="modal-content bg-card w-full max-w-lg rounded-xl p-6 shadow-2xl border border-border max-h-[80vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-4">
+            <h3 id="admin-data-modal-title" class="font-bold text-lg tracking-tight">ডাটা বিবরণ</h3>
+            <button onclick="closeModal('admin-data-modal')" class="w-8 h-8 rounded-full hover:bg-muted flex items-center justify-center transition-colors"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div id="admin-data-modal-body"></div>
     </div>
 </div>
 
@@ -343,377 +485,1043 @@
     </div>
 </div>
 
+<!-- ==================== JAVASCRIPT ==================== -->
 <script>
-    // ============================================================
-    // অথেনটিকেশন (লগইন)
-    // ============================================================
-    const VALID_USERS = { "admin": "12345", "manager": "12345", "shanto": "shanto@123" };
+// ========== FIREBASE CONFIGURATION ==========
+const firebaseConfig = {
+    apiKey: "AIzaSyBZWv9bPTb8rcDGUMrgocpZpGIEUokjdqk",
+    authDomain: "number-lister.firebaseapp.com",
+    databaseURL: "https://number-lister-default-rtdb.firebaseio.com",
+    projectId: "number-lister",
+    storageBucket: "number-lister.firebasestorage.app",
+    messagingSenderId: "603285172555",
+    appId: "1:603285172555:web:0995237556b1f9a36778ce",
+    measurementId: "G-1MW4692TCY"
+};
 
-    // ============================================================
-    // Firebase Realtime Database কনফিগারেশন (Firestore ব্যবহার নয়)
-    // ============================================================
-    const firebaseConfig = {
-        apiKey: "AIzaSyBZWv9bPTb8rcDGUMrgocpZpGIEUokjdqk",
-        authDomain: "number-lister.firebaseapp.com",
-        databaseURL: "https://number-lister-default-rtdb.firebaseio.com",
-        projectId: "number-lister",
-        storageBucket: "number-lister.firebasestorage.app",
-        messagingSenderId: "603285172555",
-        appId: "1:603285172555:web:0995237556b1f9a36778ce",
-        measurementId: "G-1MW4692TCY"
-    };
+// Initialize Firebase
+let db;
+try {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.database();
+} catch(e) {
+    console.error("Firebase Init Failed:", e.message);
+}
 
-    // Firebase ইনিশিয়ালাইজ (শুধু Realtime Database)
-    let dbClient = null;
-    try {
-        firebase.initializeApp(firebaseConfig);
-        dbClient = firebase.database();
-    } catch(e) { reportError("Firebase Init Failed: " + e.message); }
-
-    // RTDB রেফারেন্স: daily_lists/{date}/{shift}
-    function getListRef(date, shift) {
-        return dbClient.ref('daily_lists/' + date + '/' + shift);
+// ========== AUDIO ==========
+const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+function playSound(type) {
+    if (audioContext.state === 'suspended') audioContext.resume();
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    osc.connect(gain);
+    gain.connect(audioContext.destination);
+    if (type === 'success') {
+        osc.frequency.setValueAtTime(800, audioContext.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1200, audioContext.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.1, audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+        osc.start(); osc.stop(audioContext.currentTime + 0.3);
+    } else if (type === 'error') {
+        osc.frequency.setValueAtTime(200, audioContext.currentTime);
+        gain.gain.setValueAtTime(0.1, audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+        osc.type = 'sawtooth';
+        osc.start(); osc.stop(audioContext.currentTime + 0.3);
+    } else {
+        osc.frequency.setValueAtTime(600, audioContext.currentTime);
+        gain.gain.setValueAtTime(0.05, audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+        osc.start(); osc.stop(audioContext.currentTime + 0.15);
     }
+}
 
-    // ============================================================
-    // অডিও ফিডব্যাক
-    // ============================================================
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    function playSound(type) {
-        if (audioContext.state === 'suspended') audioContext.resume();
-        const osc = audioContext.createOscillator();
-        const gain = audioContext.createGain();
-        osc.connect(gain);
-        gain.connect(audioContext.destination);
-        if (type === 'success') {
-            osc.frequency.setValueAtTime(800, audioContext.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(1200, audioContext.currentTime + 0.1);
-            gain.gain.setValueAtTime(0.1, audioContext.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-            osc.start(); osc.stop(audioContext.currentTime + 0.3);
-        } else {
-            osc.frequency.setValueAtTime(200, audioContext.currentTime);
-            gain.gain.setValueAtTime(0.1, audioContext.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-            osc.type = 'sawtooth';
-            osc.start(); osc.stop(audioContext.currentTime + 0.3);
-        }
-    }
+// ========== APP STATE ==========
+let state = {
+    isLoggedIn: false,
+    user: null,
+    date: new Date().toISOString().split('T')[0],
+    shift: 'day',
+    data: {},
+    scope: 'current',
+    currentPage: 'main',
+    adminTab: 'dashboard',
+    allUsers: {},
+    activityLogs: []
+};
 
-    // ============================================================
-    // অ্যাপ স্টেট
-    // ============================================================
-    let state = {
-        isLoggedIn: localStorage.getItem('isLoggedIn') === 'true',
-        user: localStorage.getItem('loggedInUser') || '',
-        date: new Date().toISOString().split('T')[0],
-        shift: 'day',
-        data: {},
-        scope: 'current',
-    };
+const els = {
+    date: document.getElementById('date-picker'),
+    shifts: document.getElementsByName('shift'),
+    list: document.getElementById('numbers-list'),
+    input: document.getElementById('number-input'),
+    cat: document.getElementById('category-select'),
+    search: document.getElementById('search-input'),
+    addBtn: document.getElementById('add-btn'),
+    status: document.getElementById('connection-status'),
+    errorBox: document.getElementById('error-box'),
+    scopeBtn: document.getElementById('scope-btn'),
+    title: document.getElementById('list-title'),
+    stats: { total: document.getElementById('stat-total'), blasting: document.getElementById('stat-blasting'), dmg: document.getElementById('stat-dmg') }
+};
 
-    const els = {
-        date: document.getElementById('date-picker'),
-        shifts: document.getElementsByName('shift'),
-        list: document.getElementById('numbers-list'),
-        input: document.getElementById('number-input'),
-        cat: document.getElementById('category-select'),
-        search: document.getElementById('search-input'),
-        addBtn: document.getElementById('add-btn'),
-        status: document.getElementById('connection-status'),
-        errorBox: document.getElementById('error-box'),
-        scopeBtn: document.getElementById('scope-btn'),
-        title: document.getElementById('list-title'),
-        stats: { total: document.getElementById('stat-total'), blasting: document.getElementById('stat-blasting'), dmg: document.getElementById('stat-dmg') }
-    };
+// ========== INIT ==========
+function init() {
+    els.date.value = state.date;
+    applyTheme();
+    setupListeners();
+    checkSavedLogin();
+    connectDB();
+    initDefaultAdmin();
+}
 
-    // ============================================================
-    // ইনিশিয়ালাইজেশন
-    // ============================================================
-    function init() {
-        els.date.value = state.date;
-        applyTheme();
-        updateAuth();
-        setupListeners();
-        connectDB();
-    }
-
-    function setupListeners() {
-        els.date.addEventListener('change', e => { state.date = e.target.value; render(); });
-        els.shifts.forEach(r => r.addEventListener('change', e => { state.shift = e.target.value; render(); }));
-        els.input.addEventListener('keypress', e => { if(e.key==='Enter') addNumber(); });
-        els.addBtn.addEventListener('click', addNumber);
-        els.search.addEventListener('input', render);
-        document.querySelectorAll('.modal-overlay').forEach(m => {
-            m.addEventListener('click', e => { if(e.target === m && m.id !== 'confirm-modal' && m.id !== 'scanner-modal') closeModal(m.id); });
+function setupListeners() {
+    els.date.addEventListener('change', e => { state.date = e.target.value; render(); });
+    els.shifts.forEach(r => r.addEventListener('change', e => { state.shift = e.target.value; render(); }));
+    els.input.addEventListener('keypress', e => { if(e.key==='Enter') addNumber(); });
+    els.addBtn.addEventListener('click', addNumber);
+    els.search.addEventListener('input', render);
+    document.querySelectorAll('.modal-overlay').forEach(m => {
+        m.addEventListener('click', e => { 
+            if(e.target === m && m.id !== 'confirm-modal' && m.id !== 'scanner-modal') closeModal(m.id); 
         });
-    }
+    });
+}
 
-    function changeDate(days) {
-        const d = new Date(state.date);
-        d.setDate(d.getDate() + days);
-        state.date = d.toISOString().split('T')[0];
-        els.date.value = state.date;
+// ========== INIT DEFAULT ADMIN ==========
+async function initDefaultAdmin() {
+    if (!db) return;
+    try {
+        const snapshot = await db.ref('users/admin').once('value');
+        if (!snapshot.exists()) {
+            await db.ref('users/admin').set({
+                username: 'admin',
+                password: 'admin123',
+                displayName: 'সুপার অ্যাডমিন',
+                role: 'admin',
+                active: true,
+                createdAt: firebase.database.ServerValue.TIMESTAMP,
+                lastLogin: null
+            });
+            console.log('Default admin user created.');
+        }
+    } catch(err) {
+        console.error('Error creating default admin:', err);
+    }
+}
+
+// ========== FIREBASE DATABASE ==========
+function connectDB() {
+    if (!db) return reportError("Firebase সংযোগ ব্যর্থ হয়েছে");
+
+    // Listen to blasting_data
+    db.ref('blasting_data').on('value', (snapshot) => {
+        const data = snapshot.val() || {};
+        state.data = data;
+        setConnectionStatus(true);
         render();
-    }
+    }, (error) => {
+        reportError("ডাটাবেস ত্রুটি: " + error.message);
+    });
 
-    function reportError(msg) {
-        console.error(msg);
+    // Listen to users (for admin)
+    db.ref('users').on('value', (snapshot) => {
+        state.allUsers = snapshot.val() || {};
+        updateAuth();
+    });
+
+    // Listen to activity logs
+    db.ref('activity_logs').orderByChild('timestamp').limitToLast(100).on('value', (snapshot) => {
+        const logs = snapshot.val() || {};
+        state.activityLogs = Object.entries(logs).map(([key, val]) => ({id: key, ...val})).reverse();
+        if (state.currentPage === 'admin' && state.adminTab === 'logs') renderAdminLogs();
+    });
+}
+
+function setConnectionStatus(connected) {
+    if (connected) {
+        els.status.className = "flex items-center gap-2 text-xs font-medium px-2 py-1 rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
+        els.status.innerHTML = '<span class="w-2 h-2 rounded-full bg-green-500"></span> লাইভ';
+        els.errorBox.classList.add('hidden');
+    } else {
         els.status.className = "bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-bold";
         els.status.innerHTML = "সংযোগ ব্যর্থ";
-        els.errorBox.classList.remove('hidden');
-        els.errorBox.innerText = "Error: " + msg;
     }
+}
 
-    // ============================================================
-    // Firebase Realtime Database — কানেক্ট, ফেচ, রিয়েল-টাইম লিসেনার
-    // ============================================================
+async function updateRemote(date, shift, list) {
+    if (!db) return;
+    try {
+        await db.ref(`blasting_data/${date}/${shift}`).set(list);
+    } catch(err) {
+        showToast('সেভ হয়নি: ' + err.message, 'error');
+    }
+}
 
-    /**
-     * connectDB()
-     * Firebase RTDB তে ইনিশিয়াল কানেকশন ও রিয়েল-টাইম লিসেনার সেটআপ।
-     * on('value') ব্যবহার করে সম্পূর্ণ daily_lists ডাটা শোনা হয় —
-     * যেকোনো পরিবর্তনে অটোমেটিক fetchData() কল হয়।
-     */
-    function connectDB() {
-        if (!dbClient) return;
-        
-        // ইনিশিয়াল লোড
-        fetchData();
-        
-        // রিয়েল-টাইম লিসেনার — daily_lists এর যেকোনো পরিবর্তনে ট্রিগার হবে
-        dbClient.ref('daily_lists').on('value', function(snapshot) {
-            processSnapshot(snapshot);
-        }, function(error) {
-            reportError("Realtime listener failed: " + error.message);
+async function logActivity(action, details, username) {
+    if (!db) return;
+    try {
+        await db.ref('activity_logs').push({
+            action: action,
+            details: details,
+            username: username || (state.user ? state.user.username : 'anonymous'),
+            timestamp: firebase.database.ServerValue.TIMESTAMP
         });
-    }
+    } catch(e) { /* silent fail for logs */ }
+}
 
-    /**
-     * processSnapshot(snapshot)
-     * Firebase snapshot থেকে ডাটা পার্স করে state.data তে লোড করে।
-     * 
-     * Firebase RTDB স্ট্রাকচার:
-     * daily_lists/
-     *   {YYYY-MM-DD}/
-     *     day/
-     *       numbers: ["Blasting A1-L12-BM-1011", ...]
-     *       created_at: "2025-01-01T00:00:00.000Z"
-     *     night/
-     *       numbers: [...]
-     *       created_at: "..."
-     */
-    function processSnapshot(snapshot) {
+function reportError(msg) {
+    console.error(msg);
+    setConnectionStatus(false);
+    els.errorBox.classList.remove('hidden');
+    els.errorBox.innerText = "Error: " + msg;
+}
+
+// ========== AUTHENTICATION (Firebase Realtime DB) ==========
+function checkSavedLogin() {
+    const savedUser = localStorage.getItem('bl_user');
+    if (savedUser) {
         try {
-            const raw = snapshot.val();
-            els.status.className = "flex items-center gap-2 text-xs font-medium px-2 py-1 rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
-            els.status.innerHTML = '<span class="w-2 h-2 rounded-full bg-green-500"></span> লাইভ';
-            els.errorBox.classList.add('hidden');
-            
-            const formattedData = {};
-            if (raw) {
-                // raw = { "2025-01-01": { day: { numbers: [...], created_at: "..." }, night: { ... } }, ... }
-                for (let dateKey in raw) {
-                    if (!formattedData[dateKey]) formattedData[dateKey] = {};
-                    const shifts = raw[dateKey];
-                    for (let shiftKey in shifts) {
-                        formattedData[dateKey][shiftKey] = shifts[shiftKey].numbers || [];
+            const userData = JSON.parse(savedUser);
+            // Re-verify user is still active in DB
+            db.ref(`users/${userData.username}`).once('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    const dbUser = snapshot.val();
+                    if (dbUser.active) {
+                        state.isLoggedIn = true;
+                        state.user = dbUser;
+                        updateAuth();
+                    } else {
+                        localStorage.removeItem('bl_user');
+                        showToast('আপনার অ্যাকাউন্ট নিষ্ক্রিয় করা হয়েছে', 'error');
                     }
+                } else {
+                    localStorage.removeItem('bl_user');
                 }
-            }
-            state.data = formattedData;
-            render();
-        } catch (err) {
-            reportError("Data processing failed: " + err.message);
-        }
-    }
-
-    /**
-     * fetchData()
-     * একবার ম্যানুয়ালি ডাটা ফেচ করার জন্য (প্রাথমিক লোডে ব্যবহৃত)।
-     */
-    async function fetchData() {
-        if (!dbClient) return;
-        try {
-            const snapshot = await dbClient.ref('daily_lists').once('value');
-            processSnapshot(snapshot);
-        } catch (err) {
-            reportError("Initial data load failed: " + err.message);
-        }
-    }
-
-    /**
-     * updateRemote(date, shift, list)
-     * Firebase RTDB তে নির্দিষ্ট তারিখ ও শিফটের ডাটা সেট করে।
-     * set() ব্যবহার করা হয়েছে (যা upsert এর সমতুল্য)।
-     */
-    async function updateRemote(date, shift, list) {
-        if (!dbClient) return;
-        try {
-            const ref = getListRef(date, shift);
-            await ref.set({
-                numbers: list,
-                created_at: new Date().toISOString()
             });
-        } catch (error) {
-            showToast('সেভ হয়নি: ' + error.message, 'error');
+        } catch(e) {
+            localStorage.removeItem('bl_user');
         }
     }
+}
 
-    // ============================================================
-    // ডুপ্লিকেট চেকার
-    // ============================================================
-    function checkDuplicate(numToCheck) {
-        for(let d in state.data) {
-            for(let s in state.data[d]) {
-                const list = state.data[d][s] || [];
-                for(let item of list) { 
-                    const existingNum = parseItem(item).num;
-                    if(existingNum === numToCheck) return {d, s}; 
-                }
-            }
-        }
-        return null;
-    }
+async function login() {
+    const username = document.getElementById('username').value.trim().toLowerCase();
+    const password = document.getElementById('password').value;
 
-    function formatExtraText(text) {
-        if (!text) return "";
-        let formatted = text.replace(/(\d+)\s*PIC/gi, '$1Pic').replace(/(\d+)\s*PCS/gi, '$1Pcs');
-        formatted = formatted.replace(/\bpic\b/gi, 'Pic').replace(/\bpcs\b/gi, 'Pcs');
-        return formatted;
-    }
+    if (!username || !password) return showToast('ইউজারনেম ও পাসওয়ার্ড দিন', 'error');
 
-    // ============================================================
-    // নতুন নম্বর যোগ করা
-    // ============================================================
-    async function addNumber() {
-        if(!state.isLoggedIn) return showToast('লগইন করুন', 'error');
-        const val = els.input.value.trim();
-        if(!val) return showToast('কোড লিখুন', 'error');
-        
-        const entries = val.split(/\n+/).map(s=>s.trim()).filter(Boolean);
-        if(!entries.length) return;
-
-        const currentList = (state.data[state.date] && state.data[state.date][state.shift]) ? [...state.data[state.date][state.shift]] : [];
-        let added = 0;
-
-        for(let rawEntry of entries) {
-            const match = rawEntry.match(/^([a-zA-Z0-9\-]+)(.*)$/);
-            let fullStr = rawEntry.toUpperCase();
-            
-            if (match) {
-                const codePart = match[1].toUpperCase();
-                let extraPart = match[2]; 
-                extraPart = formatExtraText(extraPart);
-                fullStr = extraPart ? `${codePart}${extraPart}` : codePart;
-            }
-
-            const exists = checkDuplicate(fullStr);
-            if(exists) { 
-                playSound('error');
-                showToast(`আপনার এই নাম্বারটি ${exists.d} তারিখে যুক্ত করা হয়েছিল!`, 'error');
-                continue;
-            }
-
-            const full = `${els.cat.value} ${fullStr}`;
-            currentList.push(full); added++;
+    try {
+        const snapshot = await db.ref(`users/${username}`).once('value');
+        if (!snapshot.exists()) {
+            playSound('error');
+            return showToast('ভুল ইউজারনেম বা পাসওয়ার্ড', 'error');
         }
 
-        if(added > 0) {
-            currentList.sort();
-            if (!state.data[state.date]) state.data[state.date] = {};
-            state.data[state.date][state.shift] = currentList;
-            render();
-            playSound('success');
-            await updateRemote(state.date, state.shift, currentList);
-            els.input.value = '';
-            showToast(`${added} টি সফলভাবে যোগ হয়েছে`, 'success');
-        } 
-    }
-
-    // ============================================================
-    // UI হেল্পার ফাংশন
-    // ============================================================
-    function getCatStyles(cat) {
-        switch(cat) {
-            case 'Blasting': return { class: 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800', icon: 'bi-box-seam' };
-            case 'Import': return { class: 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800', icon: 'bi-truck' };
-            case 'Damaged': return { class: 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800', icon: 'bi-x-octagon' };
-            case 'Return': return { class: 'bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-800', icon: 'bi-arrow-return-left' };
-            default: return { class: 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700', icon: 'bi-hash' };
-        }
-    }
-
-    function formatFraction(text) {
-        return text.replace(/(\d+)\/(\d+)/g, function(match, num, den) {
-            return `<span class="inline-flex flex-col text-center align-middle text-[0.65rem] leading-[0.8] mx-0.5 font-bold" style="vertical-align: middle;">
-                <span class="border-b border-current px-0.5">${num}</span>
-                <span class="pt-0.5">${den}</span>
-            </span>`;
-        });
-    }
-
-    function render() {
-        const q = els.search.value.toLowerCase();
-        let items = [];
-        if(state.scope === 'current') {
-            const raw = (state.data[state.date] && state.data[state.date][state.shift]) || [];
-            items = raw.map(i => ({ str: i, d: state.date, s: state.shift }));
-            els.title.innerText = `তালিকা (${state.shift === 'day' ? 'দিন' : 'রাত'}) - ${raw.length} টি`;
-        } else {
-            for(let d in state.data) {
-                for(let s in state.data[d]) {
-                    const raw = state.data[d][s] || [];
-                    raw.forEach(i => items.push({ str: i, d: d, s: s }));
-                }
-            }
-            items.sort((a, b) => new Date(b.d) - new Date(a.d));
-            els.title.innerText = q ? "সার্চ রেজাল্ট" : `সকল তালিকা (${items.length} টি)`;
+        const userData = snapshot.val();
+        if (!userData.active) {
+            playSound('error');
+            return showToast('এই অ্যাকাউন্টটি নিষ্ক্রিয় করা হয়েছে', 'error');
         }
 
-        const filtered = items.filter(x => x.str.toLowerCase().includes(q));
+        if (userData.password !== password) {
+            playSound('error');
+            return showToast('ভুল ইউজারনেম বা পাসওয়ার্ড', 'error');
+        }
 
-        els.stats.total.innerText = filtered.length;
-        els.stats.blasting.innerText = filtered.filter(x => x.str.startsWith('Blasting')).length;
-        els.stats.dmg.innerText = filtered.filter(x => x.str.startsWith('Damaged') || x.str.startsWith('Return')).length;
+        // Success
+        state.isLoggedIn = true;
+        state.user = userData;
+        localStorage.setItem('bl_user', JSON.stringify(userData));
 
-        els.list.innerHTML = '';
-        if(!filtered.length) {
-            els.list.innerHTML = `<div class="text-center py-10 opacity-50"><i class="bi bi-inbox text-4xl"></i><p class="text-sm mt-2">তথ্য নেই</p></div>`;
+        // Update last login
+        db.ref(`users/${username}/lastLogin`).set(firebase.database.ServerValue.TIMESTAMP);
+
+        await logActivity('login', `${userData.displayName || userData.username} লগইন করেছেন`, username);
+
+        playSound('success');
+        updateAuth();
+        closeModal('settings-modal');
+        showToast('স্বাগতম, ' + (userData.displayName || userData.username) + '!', 'success');
+    } catch(err) {
+        showToast('লগইন ত্রুটি: ' + err.message, 'error');
+    }
+}
+
+function logout() {
+    if (state.user) {
+        logActivity('logout', `${state.user.displayName || state.user.username} লগআউট করেছেন`, state.user.username);
+    }
+    state.isLoggedIn = false;
+    state.user = null;
+    localStorage.removeItem('bl_user');
+    updateAuth();
+    closeModal('settings-modal');
+    if (state.currentPage === 'admin') showPage('main');
+    showToast('লগআউট হয়েছে', 'success');
+}
+
+function updateAuth() {
+    els.addBtn.disabled = !state.isLoggedIn;
+    document.getElementById('add-section').classList.toggle('opacity-50', !state.isLoggedIn);
+    document.getElementById('add-section').classList.toggle('pointer-events-none', !state.isLoggedIn);
+    document.getElementById('auth-message').classList.toggle('hidden', state.isLoggedIn);
+    document.getElementById('login-form').classList.toggle('hidden', state.isLoggedIn);
+    document.getElementById('profile-info').classList.toggle('hidden', !state.isLoggedIn);
+
+    if (state.isLoggedIn && state.user) {
+        document.getElementById('user-display').innerText = state.user.displayName || state.user.username;
+        const roleText = state.user.role === 'admin' ? 'অ্যাডমিন' : 'সাধারণ ইউজার';
+        document.getElementById('user-role-display').innerText = roleText;
+        document.getElementById('admin-panel-btn-container').classList.toggle('hidden', state.user.role !== 'admin');
+        document.getElementById('admin-header-btn').classList.toggle('hidden', state.user.role !== 'admin');
+    } else {
+        document.getElementById('admin-panel-btn-container').classList.add('hidden');
+        document.getElementById('admin-header-btn').classList.add('hidden');
+    }
+
+    if (state.currentPage === 'main') render();
+}
+
+// ========== PAGE NAVIGATION ==========
+function showPage(page) {
+    state.currentPage = page;
+    document.getElementById('main-page').classList.toggle('hidden', page !== 'main');
+    document.getElementById('admin-page').classList.toggle('hidden', page !== 'admin');
+    document.getElementById('mobile-nav').classList.toggle('hidden', page !== 'main');
+
+    if (page === 'admin') {
+        if (!state.isLoggedIn || state.user.role !== 'admin') {
+            showToast('অ্যাডমিন অনুমতি প্রয়োজন', 'error');
+            state.currentPage = 'main';
+            document.getElementById('main-page').classList.remove('hidden');
+            document.getElementById('admin-page').classList.add('hidden');
+            document.getElementById('mobile-nav').classList.remove('hidden');
             return;
         }
+        renderAdminDashboard();
+    }
+}
 
-        els.list.innerHTML = filtered.map((x, i) => {
-            const {cat, num} = parseItem(x.str);
-            const match = num.match(/^([A-Z0-9\-]+)(.*)$/);
-            let code = num;
-            let extra = "";
-            
-            if(match) {
-                code = match[1];
-                extra = match[2].trim();
+// ========== ADMIN PANEL ==========
+function showAdminTab(tab) {
+    state.adminTab = tab;
+    document.querySelectorAll('.admin-tab').forEach(btn => {
+        btn.className = btn.id === `tab-${tab}` 
+            ? 'admin-tab shadcn-btn text-xs whitespace-nowrap' 
+            : 'admin-tab shadcn-btn-outline text-xs whitespace-nowrap';
+    });
+
+    switch(tab) {
+        case 'dashboard': renderAdminDashboard(); break;
+        case 'users': renderAdminUsers(); break;
+        case 'data': renderAdminData(); break;
+        case 'logs': renderAdminLogs(); break;
+    }
+}
+
+// --- Admin Dashboard ---
+function renderAdminDashboard() {
+    const container = document.getElementById('admin-content');
+    const users = Object.values(state.allUsers).filter(u => u);
+    const totalUsers = users.length;
+    const activeUsers = users.filter(u => u.active).length;
+    const adminCount = users.filter(u => u.role === 'admin').length;
+
+    let totalEntries = 0;
+    let totalDates = 0;
+    let blastCount = 0;
+    let damageCount = 0;
+
+    for (let dateKey in state.data) {
+        totalDates++;
+        for (let shiftKey in state.data[dateKey]) {
+            const items = state.data[dateKey][shiftKey] || [];
+            totalEntries += items.length;
+            items.forEach(item => {
+                const {cat} = parseItem(item);
+                if (cat === 'Blasting') blastCount++;
+                if (cat === 'Damaged' || cat === 'Return') damageCount++;
+            });
+        }
+    }
+
+    container.innerHTML = `
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+            <div class="admin-stat-card shadcn-card p-4 rounded-lg">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center text-xl"><i class="bi bi-people-fill"></i></div>
+                    <div>
+                        <div class="text-2xl font-bold">${totalUsers}</div>
+                        <div class="text-[10px] text-muted-foreground uppercase font-bold">মোট ইউজার</div>
+                    </div>
+                </div>
+            </div>
+            <div class="admin-stat-card shadcn-card p-4 rounded-lg">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400 flex items-center justify-center text-xl"><i class="bi bi-person-check-fill"></i></div>
+                    <div>
+                        <div class="text-2xl font-bold">${activeUsers}</div>
+                        <div class="text-[10px] text-muted-foreground uppercase font-bold">সক্রিয় ইউজার</div>
+                    </div>
+                </div>
+            </div>
+            <div class="admin-stat-card shadcn-card p-4 rounded-lg">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xl"><i class="bi bi-database-fill"></i></div>
+                    <div>
+                        <div class="text-2xl font-bold">${totalEntries}</div>
+                        <div class="text-[10px] text-muted-foreground uppercase font-bold">মোট এন্ট্রি</div>
+                    </div>
+                </div>
+            </div>
+            <div class="admin-stat-card shadcn-card p-4 rounded-lg">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 flex items-center justify-center text-xl"><i class="bi bi-calendar3"></i></div>
+                    <div>
+                        <div class="text-2xl font-bold">${totalDates}</div>
+                        <div class="text-[10px] text-muted-foreground uppercase font-bold">মোট দিন</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div class="shadcn-card p-5 rounded-lg">
+                <h3 class="font-bold text-sm mb-4 flex items-center gap-2"><i class="bi bi-bar-chart-fill text-primary"></i> ক্যাটাগরি সামারি</h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-green-500"></span> Blasting</span>
+                        <span class="font-bold">${blastCount}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-blue-500"></span> Import</span>
+                        <span class="font-bold">${totalEntries - blastCount - damageCount}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-red-500"></span> Damaged/Return</span>
+                        <span class="font-bold">${damageCount}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="shadcn-card p-5 rounded-lg">
+                <h3 class="font-bold text-sm mb-4 flex items-center gap-2"><i class="bi bi-shield-fill-check text-primary"></i> দ্রুত অ্যাকশন</h3>
+                <div class="space-y-2">
+                    <button onclick="showAdminTab('users')" class="w-full py-2.5 px-4 rounded-md bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors text-left flex items-center gap-2">
+                        <i class="bi bi-person-plus-fill"></i> নতুন ইউজার তৈরি করুন
+                    </button>
+                    <button onclick="showAdminTab('data')" class="w-full py-2.5 px-4 rounded-md bg-blue-50 dark:bg-blue-900/10 text-blue-600 dark:text-blue-400 text-sm font-medium hover:bg-blue-100 dark:hover:bg-blue-900/20 transition-colors text-left flex items-center gap-2">
+                        <i class="bi bi-database-gear"></i> ডাটা ম্যানেজ করুন
+                    </button>
+                    <button onclick="showAdminTab('logs')" class="w-full py-2.5 px-4 rounded-md bg-muted text-foreground text-sm font-medium hover:bg-muted/80 transition-colors text-left flex items-center gap-2">
+                        <i class="bi bi-clock-history"></i> অ্যাক্টিভিটি লগ দেখুন
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="shadcn-card p-5 rounded-lg">
+            <h3 class="font-bold text-sm mb-4 flex items-center gap-2"><i class="bi bi-lightning-fill text-accent"></i> সাম্প্রতিক অ্যাক্টিভিটি</h3>
+            <div class="space-y-2">
+                ${state.activityLogs.slice(0, 5).map(log => `
+                    <div class="flex items-center gap-3 p-2 rounded-md hover:bg-muted/50">
+                        <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm flex-shrink-0">
+                            <i class="bi ${getActivityIcon(log.action)}"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs font-medium truncate">${log.details}</p>
+                            <p class="text-[10px] text-muted-foreground">${log.username} - ${formatTimestamp(log.timestamp)}</p>
+                        </div>
+                    </div>
+                `).join('') || '<p class="text-xs text-muted-foreground text-center py-4">কোনো অ্যাক্টিভিটি নেই</p>'}
+            </div>
+        </div>
+    `;
+}
+
+function getActivityIcon(action) {
+    const icons = {
+        'login': 'bi-box-arrow-in-right',
+        'logout': 'bi-box-arrow-right',
+        'add': 'bi-plus-circle-fill',
+        'delete': 'bi-trash-fill',
+        'edit': 'bi-pencil-fill',
+        'user_create': 'bi-person-plus-fill',
+        'user_edit': 'bi-person-gear',
+        'user_delete': 'bi-person-x-fill',
+        'user_toggle': 'bi-toggle-on',
+        'data_delete': 'bi-database-x',
+        'password_change': 'bi-key-fill'
+    };
+    return icons[action] || 'bi-activity';
+}
+
+function formatTimestamp(ts) {
+    if (!ts) return 'অজানা';
+    const d = new Date(ts);
+    const now = new Date();
+    const diff = now - d;
+    if (diff < 60000) return 'এইমাত্র';
+    if (diff < 3600000) return Math.floor(diff/60000) + ' মিনিট আগে';
+    if (diff < 86400000) return Math.floor(diff/3600000) + ' ঘণ্টা আগে';
+    return d.toLocaleDateString('bn-BD') + ' ' + d.toLocaleTimeString('bn-BD', {hour:'2-digit', minute:'2-digit'});
+}
+
+// --- Admin Users ---
+function renderAdminUsers() {
+    const container = document.getElementById('admin-content');
+    const users = Object.entries(state.allUsers).filter(([k, u]) => u);
+
+    container.innerHTML = `
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="font-bold text-lg">ইউজার তালিকা (${users.length})</h3>
+            <button onclick="openAdminUserModal()" class="shadcn-btn text-xs">
+                <i class="bi bi-plus-lg mr-1"></i> নতুন ইউজার
+            </button>
+        </div>
+        <div class="shadcn-card rounded-lg overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-border bg-muted/50">
+                            <th class="text-left p-3 text-xs font-bold text-muted-foreground">ইউজার</th>
+                            <th class="text-left p-3 text-xs font-bold text-muted-foreground hidden sm:table-cell">ভূমিকা</th>
+                            <th class="text-left p-3 text-xs font-bold text-muted-foreground hidden md:table-cell">শেষ লগইন</th>
+                            <th class="text-left p-3 text-xs font-bold text-muted-foreground">স্ট্যাটাস</th>
+                            <th class="text-right p-3 text-xs font-bold text-muted-foreground">অ্যাকশন</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${users.map(([key, u]) => `
+                            <tr class="admin-table-row border-b border-border last:border-0">
+                                <td class="p-3">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-bold flex-shrink-0">
+                                            ${(u.displayName || u.username).charAt(0).toUpperCase()}
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-sm">${u.displayName || u.username}</p>
+                                            <p class="text-[10px] text-muted-foreground">@${u.username}</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="p-3 hidden sm:table-cell">
+                                    <span class="badge ${u.role === 'admin' ? 'badge-admin' : 'badge-user'}">${u.role === 'admin' ? 'অ্যাডমিন' : 'ইউজার'}</span>
+                                </td>
+                                <td class="p-3 hidden md:table-cell text-xs text-muted-foreground">${u.lastLogin ? formatTimestamp(u.lastLogin) : 'কখনো লগইন করেনি'}</td>
+                                <td class="p-3">
+                                    <span class="badge ${u.active ? 'badge-active' : 'badge-inactive'}">${u.active ? 'সক্রিয়' : 'নিষ্ক্রিয়'}</span>
+                                </td>
+                                <td class="p-3 text-right">
+                                    <div class="flex justify-end gap-1">
+                                        <button onclick="openAdminUserModal('${key}')" class="w-7 h-7 rounded hover:bg-muted flex items-center justify-center text-blue-500" title="এডিট">
+                                            <i class="bi bi-pencil-square text-sm"></i>
+                                        </button>
+                                        ${key !== 'admin' ? `
+                                        <button onclick="toggleUserStatus('${key}', ${!u.active})" class="w-7 h-7 rounded hover:bg-muted flex items-center justify-center ${u.active ? 'text-orange-500' : 'text-green-500'}" title="${u.active ? 'নিষ্ক্রিয়' : 'সক্রিয়'}">
+                                            <i class="bi ${u.active ? 'bi-pause-circle' : 'bi-play-circle'} text-sm"></i>
+                                        </button>
+                                        <button onclick="deleteAdminUser('${key}', '${u.username}')" class="w-7 h-7 rounded hover:bg-red-50 dark:hover:bg-red-900/10 flex items-center justify-center text-destructive" title="ডিলিট">
+                                            <i class="bi bi-trash text-sm"></i>
+                                        </button>
+                                        ` : `
+                                        <span class="text-[10px] text-muted-foreground italic">ডিফল্ট</span>
+                                        `}
+                                    </div>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+}
+
+function openAdminUserModal(editKey) {
+    const modal = document.getElementById('admin-user-modal');
+    const title = document.getElementById('admin-user-modal-title');
+    const keyInput = document.getElementById('admin-edit-user-key');
+
+    if (editKey && state.allUsers[editKey]) {
+        const u = state.allUsers[editKey];
+        title.innerText = 'ইউজার এডিট করুন';
+        keyInput.value = editKey;
+        document.getElementById('admin-new-username').value = u.username;
+        document.getElementById('admin-new-username').disabled = true;
+        document.getElementById('admin-new-displayname').value = u.displayName || '';
+        document.getElementById('admin-new-password').value = '';
+        document.getElementById('admin-new-password').placeholder = 'পরিবর্তন না করলে ফাঁকা রাখুন';
+        document.getElementById('admin-new-role').value = u.role;
+        document.getElementById('admin-new-active').checked = u.active;
+    } else {
+        title.innerText = 'নতুন ইউজার তৈরি করুন';
+        keyInput.value = '';
+        document.getElementById('admin-new-username').value = '';
+        document.getElementById('admin-new-username').disabled = false;
+        document.getElementById('admin-new-displayname').value = '';
+        document.getElementById('admin-new-password').value = '';
+        document.getElementById('admin-new-password').placeholder = 'পাসওয়ার্ড';
+        document.getElementById('admin-new-role').value = 'user';
+        document.getElementById('admin-new-active').checked = true;
+    }
+
+    openModal('admin-user-modal');
+}
+
+async function saveAdminUser() {
+    const editKey = document.getElementById('admin-edit-user-key').value;
+    const username = document.getElementById('admin-new-username').value.trim().toLowerCase();
+    const displayName = document.getElementById('admin-new-displayname').value.trim();
+    const password = document.getElementById('admin-new-password').value;
+    const role = document.getElementById('admin-new-role').value;
+    const active = document.getElementById('admin-new-active').checked;
+
+    // Validation
+    if (!username) return showToast('ইউজারনেম দিন', 'error');
+    if (!/^[a-z0-9_]+$/.test(username)) return showToast('ইউজারনেমে শুধুমাত্র ছোট হাতের ইংরেজি, সংখ্যা ও আন্ডারস্কোর দিন', 'error');
+
+    if (editKey) {
+        // Edit existing user
+        const updates = {
+            displayName: displayName || username,
+            role: role,
+            active: active
+        };
+        if (password) {
+            updates.password = password;
+        }
+        try {
+            await db.ref(`users/${editKey}`).update(updates);
+            await logActivity('user_edit', `${username} ইউজার আপডেট করা হয়েছে`);
+            showToast('ইউজার আপডেট হয়েছে', 'success');
+            closeModal('admin-user-modal');
+        } catch(err) {
+            showToast('আপডেট ব্যর্থ: ' + err.message, 'error');
+        }
+    } else {
+        // Create new user
+        if (!password) return showToast('পাসওয়ার্ড দিন', 'error');
+        if (password.length < 4) return showToast('পাসওয়ার্ড কমপক্ষে ৪ অক্ষরের হতে হবে', 'error');
+
+        // Check if username exists
+        const snapshot = await db.ref(`users/${username}`).once('value');
+        if (snapshot.exists()) return showToast('এই ইউজারনেমটি ইতিমধ্যে ব্যবহৃত', 'error');
+
+        try {
+            await db.ref(`users/${username}`).set({
+                username: username,
+                password: password,
+                displayName: displayName || username,
+                role: role,
+                active: active,
+                createdAt: firebase.database.ServerValue.TIMESTAMP,
+                lastLogin: null
+            });
+            await logActivity('user_create', `${username} ইউজার তৈরি করা হয়েছে (${role})`);
+            showToast('নতুন ইউজার তৈরি হয়েছে', 'success');
+            closeModal('admin-user-modal');
+            playSound('success');
+        } catch(err) {
+            showToast('তৈরি ব্যর্থ: ' + err.message, 'error');
+        }
+    }
+}
+
+async function toggleUserStatus(username, newStatus) {
+    const action = newStatus ? 'সক্রিয়' : 'নিষ্ক্রিয়';
+    if (await openConfirm(`ইউজার ${action} করবেন?`, `${username} কে ${action} করা হবে।`)) {
+        try {
+            await db.ref(`users/${username}/active`).set(newStatus);
+            await logActivity('user_toggle', `${username} কে ${action} করা হয়েছে`);
+            showToast(`${username} ${action} করা হয়েছে`, 'success');
+        } catch(err) {
+            showToast('ব্যর্থ: ' + err.message, 'error');
+        }
+    }
+}
+
+async function deleteAdminUser(username, displayName) {
+    if (username === 'admin') return showToast('ডিফল্ট অ্যাডমিন ডিলিট করা যাবে না', 'error');
+    if (await openConfirm('ইউজার ডিলিট করবেন?', `${displayName || username} কে স্থায়ীভাবে মুছে ফেলা হবে।`)) {
+        try {
+            await db.ref(`users/${username}`).remove();
+            await logActivity('user_delete', `${displayName || username} ইউজার ডিলিট করা হয়েছে`);
+            showToast('ইউজার ডিলিট হয়েছে', 'success');
+            playSound('success');
+        } catch(err) {
+            showToast('ডিলিট ব্যর্থ: ' + err.message, 'error');
+        }
+    }
+}
+
+function togglePasswordVisibility(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (input.type === 'password') {
+        input.type = 'text';
+        btn.innerHTML = '<i class="bi bi-eye-slash"></i>';
+    } else {
+        input.type = 'password';
+        btn.innerHTML = '<i class="bi bi-eye"></i>';
+    }
+}
+
+// --- Admin Data Management ---
+function renderAdminData() {
+    const container = document.getElementById('admin-content');
+    const dates = Object.keys(state.data).sort().reverse();
+
+    let totalAll = 0;
+    dates.forEach(d => {
+        for (let s in state.data[d]) {
+            totalAll += (state.data[d][s] || []).length;
+        }
+    });
+
+    container.innerHTML = `
+        <div class="flex flex-wrap justify-between items-center gap-3 mb-4">
+            <div>
+                <h3 class="font-bold text-lg">ডাটা ম্যানেজমেন্ট</h3>
+                <p class="text-xs text-muted-foreground">মোট ${dates.length} টি তারিখে ${totalAll} টি এন্ট্রি</p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="clearAllData()" class="shadcn-btn-destructive text-xs">
+                    <i class="bi bi-trash3 mr-1"></i> সব ডাটা মুছুন
+                </button>
+            </div>
+        </div>
+        <div class="shadcn-card rounded-lg overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-border bg-muted/50">
+                            <th class="text-left p-3 text-xs font-bold text-muted-foreground">তারিখ</th>
+                            <th class="text-center p-3 text-xs font-bold text-muted-foreground">দিন</th>
+                            <th class="text-center p-3 text-xs font-bold text-muted-foreground">রাত</th>
+                            <th class="text-center p-3 text-xs font-bold text-muted-foreground">মোট</th>
+                            <th class="text-right p-3 text-xs font-bold text-muted-foreground">অ্যাকশন</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${dates.length === 0 ? `<tr><td colspan="5" class="p-8 text-center text-muted-foreground">কোনো ডাটা নেই</td></tr>` : ''}
+                        ${dates.map(dateKey => {
+                            const dayData = state.data[dateKey].day || [];
+                            const nightData = state.data[dateKey].night || [];
+                            const total = dayData.length + nightData.length;
+                            return `
+                                <tr class="admin-table-row border-b border-border last:border-0">
+                                    <td class="p-3 font-medium">${dateKey}</td>
+                                    <td class="p-3 text-center"><span class="badge badge-active">${dayData.length}</span></td>
+                                    <td class="p-3 text-center"><span class="badge badge-user">${nightData.length}</span></td>
+                                    <td class="p-3 text-center font-bold">${total}</td>
+                                    <td class="p-3 text-right">
+                                        <div class="flex justify-end gap-1">
+                                            <button onclick="viewDateData('${dateKey}')" class="w-7 h-7 rounded hover:bg-muted flex items-center justify-center text-primary" title="দেখুন">
+                                                <i class="bi bi-eye text-sm"></i>
+                                            </button>
+                                            <button onclick="deleteDateData('${dateKey}')" class="w-7 h-7 rounded hover:bg-red-50 dark:hover:bg-red-900/10 flex items-center justify-center text-destructive" title="মুছুন">
+                                                <i class="bi bi-trash text-sm"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+}
+
+function viewDateData(dateKey) {
+    const body = document.getElementById('admin-data-modal-body');
+    const dayData = state.data[dateKey]?.day || [];
+    const nightData = state.data[dateKey]?.night || [];
+    const total = dayData.length + nightData.length;
+
+    document.getElementById('admin-data-modal-title').innerText = `ডাটা: ${dateKey} (মোট ${total})`;
+
+    let html = '';
+
+    if (dayData.length > 0) {
+        html += `
+            <div class="mb-4">
+                <h4 class="text-xs font-bold text-muted-foreground uppercase mb-2 flex items-center gap-2"><i class="bi bi-sun-fill text-yellow-500"></i> দিন শিফট (${dayData.length})</h4>
+                <div class="space-y-1 max-h-60 overflow-y-auto">
+                    ${dayData.map((item, i) => {
+                        const {cat, num} = parseItem(item);
+                        return `<div class="flex items-center justify-between p-2 rounded bg-muted/50 text-xs">
+                            <span class="text-muted-foreground w-6">${i+1}.</span>
+                            <span class="badge ${cat === 'Blasting' ? 'badge-active' : cat === 'Damaged' ? 'badge-inactive' : 'badge-user'}">${cat}</span>
+                            <span class="font-mono font-medium">${num}</span>
+                        </div>`;
+                    }).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    if (nightData.length > 0) {
+        html += `
+            <div class="mb-4">
+                <h4 class="text-xs font-bold text-muted-foreground uppercase mb-2 flex items-center gap-2"><i class="bi bi-moon-stars-fill text-blue-500"></i> রাত শিফট (${nightData.length})</h4>
+                <div class="space-y-1 max-h-60 overflow-y-auto">
+                    ${nightData.map((item, i) => {
+                        const {cat, num} = parseItem(item);
+                        return `<div class="flex items-center justify-between p-2 rounded bg-muted/50 text-xs">
+                            <span class="text-muted-foreground w-6">${i+1}.</span>
+                            <span class="badge ${cat === 'Blasting' ? 'badge-active' : cat === 'Damaged' ? 'badge-inactive' : 'badge-user'}">${cat}</span>
+                            <span class="font-mono font-medium">${num}</span>
+                        </div>`;
+                    }).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    if (!dayData.length && !nightData.length) {
+        html = '<p class="text-center text-muted-foreground py-4 text-sm">এই তারিখে কোনো ডাটা নেই</p>';
+    }
+
+    body.innerHTML = html;
+    openModal('admin-data-modal');
+}
+
+async function deleteDateData(dateKey) {
+    if (await openConfirm('তারিখের ডাটা মুছবেন?', `${dateKey} এর সব ডাটা মুছে যাবে।`)) {
+        try {
+            await db.ref(`blasting_data/${dateKey}`).remove();
+            await logActivity('data_delete', `${dateKey} তারিখের সব ডাটা মুছে ফেলা হয়েছে`);
+            showToast(`${dateKey} এর ডাটা মুছে ফেলা হয়েছে`, 'success');
+            renderAdminData();
+        } catch(err) {
+            showToast('ব্যর্থ: ' + err.message, 'error');
+        }
+    }
+}
+
+async function clearAllData() {
+    if (await openConfirm('সতর্কতা! সব ডাটা মুছবেন?', 'সমস্ত তারিখের সমস্ত ডাটা স্থায়ীভাবে মুছে যাবে। এই কাজ ফিরিয়ে আনা যাবে না!')) {
+        try {
+            await db.ref('blasting_data').remove();
+            await logActivity('data_delete', 'সমস্ত ডাটা মুছে ফেলা হয়েছে');
+            showToast('সব ডাটা মুছে ফেলা হয়েছে', 'success');
+            renderAdminData();
+        } catch(err) {
+            showToast('ব্যর্থ: ' + err.message, 'error');
+        }
+    }
+}
+
+// --- Admin Activity Logs ---
+function renderAdminLogs() {
+    const container = document.getElementById('admin-content');
+
+    container.innerHTML = `
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="font-bold text-lg">অ্যাক্টিভিটি লগ</h3>
+            <button onclick="clearActivityLogs()" class="shadcn-btn-outline text-xs text-destructive border-destructive/30">
+                <i class="bi bi-trash3 mr-1"></i> লগ মুছুন
+            </button>
+        </div>
+        <div class="shadcn-card rounded-lg overflow-hidden">
+            <div class="divide-y divide-border max-h-[70vh] overflow-y-auto">
+                ${state.activityLogs.length === 0 ? '<p class="text-center text-muted-foreground py-8 text-sm">কোনো লগ নেই</p>' : ''}
+                ${state.activityLogs.map(log => `
+                    <div class="flex items-start gap-3 p-3 hover:bg-muted/30">
+                        <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm flex-shrink-0 mt-0.5">
+                            <i class="bi ${getActivityIcon(log.action)}"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium">${log.details}</p>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="text-[10px] text-muted-foreground"><i class="bi bi-person mr-1"></i>${log.username}</span>
+                                <span class="text-[10px] text-muted-foreground"><i class="bi bi-clock mr-1"></i>${formatTimestamp(log.timestamp)}</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+}
+
+async function clearActivityLogs() {
+    if (await openConfirm('লগ মুছবেন?', 'সমস্ত অ্যাক্টিভিটি লগ মুছে যাবে।')) {
+        try {
+            await db.ref('activity_logs').remove();
+            showToast('লগ মুছে ফেলা হয়েছে', 'success');
+        } catch(err) {
+            showToast('ব্যর্থ: ' + err.message, 'error');
+        }
+    }
+}
+
+// ========== MAIN APP FUNCTIONS ==========
+
+function changeDate(days) {
+    const d = new Date(state.date);
+    d.setDate(d.getDate() + days);
+    state.date = d.toISOString().split('T')[0];
+    els.date.value = state.date;
+    render();
+}
+
+function checkDuplicate(numToCheck) {
+    for (let d in state.data) {
+        for (let s in state.data[d]) {
+            const list = state.data[d][s] || [];
+            for (let item of list) {
+                const existingNum = parseItem(item).num;
+                if (existingNum === numToCheck) return { d, s };
             }
-            
-            let displayCode = code;
-            if(q) {
-                displayCode = code.replace(new RegExp(`(${q})`, "gi"), (match) => `<span class="highlight">${match}</span>`);
+        }
+    }
+    return null;
+}
+
+function formatExtraText(text) {
+    if (!text) return "";
+    let formatted = text.replace(/(\d+)\s*PIC/gi, '$1Pic').replace(/(\d+)\s*PCS/gi, '$1Pcs');
+    formatted = formatted.replace(/\bpic\b/gi, 'Pic').replace(/\bpcs\b/gi, 'Pcs');
+    return formatted;
+}
+
+async function addNumber() {
+    if (!state.isLoggedIn) return showToast('লগইন করুন', 'error');
+    const val = els.input.value.trim();
+    if (!val) return showToast('কোড লিখুন', 'error');
+
+    const entries = val.split(/\n+/).map(s => s.trim()).filter(Boolean);
+    if (!entries.length) return;
+
+    const currentList = (state.data[state.date] && state.data[state.date][state.shift]) ? [...state.data[state.date][state.shift]] : [];
+    let added = 0;
+
+    for (let rawEntry of entries) {
+        const match = rawEntry.match(/^([a-zA-Z0-9\-]+)(.*)$/);
+        let fullStr = rawEntry.toUpperCase();
+
+        if (match) {
+            const codePart = match[1].toUpperCase();
+            let extraPart = match[2];
+            extraPart = formatExtraText(extraPart);
+            fullStr = extraPart ? `${codePart}${extraPart}` : codePart;
+        }
+
+        const exists = checkDuplicate(fullStr);
+        if (exists) {
+            playSound('error');
+            showToast(`এই নাম্বারটি ${exists.d} তারিখে যুক্ত করা হয়েছিল!`, 'error');
+            continue;
+        }
+
+        const full = `${els.cat.value} ${fullStr}`;
+        currentList.push(full);
+        added++;
+    }
+
+    if (added > 0) {
+        if (!state.data[state.date]) state.data[state.date] = {};
+        state.data[state.date][state.shift] = currentList;
+        render();
+        playSound('success');
+        await updateRemote(state.date, state.shift, currentList);
+        await logActivity('add', `${added} টি আইটেম যোগ হয়েছে (${state.date} ${state.shift})`);
+        els.input.value = '';
+        showToast(`${added} টি সফলভাবে যোগ হয়েছে`, 'success');
+    }
+}
+
+function getCatStyles(cat) {
+    switch (cat) {
+        case 'Blasting': return { class: 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800', icon: 'bi-box-seam' };
+        case 'Import': return { class: 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800', icon: 'bi-truck' };
+        case 'Damaged': return { class: 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800', icon: 'bi-x-octagon' };
+        case 'Return': return { class: 'bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-800', icon: 'bi-arrow-return-left' };
+        default: return { class: 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700', icon: 'bi-hash' };
+    }
+}
+
+function formatFraction(text) {
+    return text.replace(/(\d+)\/(\d+)/g, function(match, num, den) {
+        return `<span class="inline-flex flex-col text-center align-middle text-[0.65rem] leading-[0.8] mx-0.5 font-bold" style="vertical-align: middle;">
+            <span class="border-b border-current px-0.5">${num}</span>
+            <span class="pt-0.5">${den}</span>
+        </span>`;
+    });
+}
+
+function render() {
+    if (state.currentPage !== 'main') return;
+
+    const q = els.search.value.toLowerCase();
+    let items = [];
+
+    if (state.scope === 'current') {
+        const raw = (state.data[state.date] && state.data[state.date][state.shift]) || [];
+        items = raw.map(i => ({ str: i, d: state.date, s: state.shift }));
+        els.title.innerText = `তালিকা (${state.shift === 'day' ? 'দিন' : 'রাত'}) - ${raw.length} টি`;
+    } else {
+        for (let d in state.data) {
+            for (let s in state.data[d]) {
+                const raw = state.data[d][s] || [];
+                raw.forEach(i => items.push({ str: i, d: d, s: s }));
             }
+        }
+        items.sort((a, b) => new Date(b.d) - new Date(a.d));
+        els.title.innerText = q ? "সার্চ রেজাল্ট" : `সকল তালিকা (${items.length} টি)`;
+    }
 
-            const formattedExtraText = formatExtraText(extra);
-            const finalExtraHtml = formattedExtraText ? formatFraction(formattedExtraText) : "";
+    const filtered = items.filter(x => x.str.toLowerCase().includes(q));
 
-            const isMe = x.d === state.date && x.s === state.shift;
-            const style = getCatStyles(cat);
-            
-            return `
-            <li class="list-item group bg-card border border-border rounded-lg p-3 flex justify-between items-start shadow-sm animate-enter" style="animation-delay:${i*0.03}s">
+    els.stats.total.innerText = filtered.length;
+    els.stats.blasting.innerText = filtered.filter(x => x.str.startsWith('Blasting')).length;
+    els.stats.dmg.innerText = filtered.filter(x => x.str.startsWith('Damaged') || x.str.startsWith('Return')).length;
+
+    els.list.innerHTML = '';
+    if (!filtered.length) {
+        els.list.innerHTML = `<div class="text-center py-10 opacity-50"><i class="bi bi-inbox text-4xl"></i><p class="text-sm mt-2">তথ্য নেই</p></div>`;
+        return;
+    }
+
+    els.list.innerHTML = filtered.map((x, i) => {
+        const { cat, num } = parseItem(x.str);
+        const match = num.match(/^([A-Z0-9\-]+)(.*)$/);
+        let code = num;
+        let extra = "";
+
+        if (match) {
+            code = match[1];
+            extra = match[2].trim();
+        }
+
+        let displayCode = code;
+        if (q) {
+            displayCode = code.replace(new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, "gi"), (match) => `<span class="highlight">${match}</span>`);
+        }
+
+        const formattedExtraText = formatExtraText(extra);
+        const finalExtraHtml = formattedExtraText ? formatFraction(formattedExtraText) : "";
+
+        const isMe = x.d === state.date && x.s === state.shift;
+        const isAdmin = state.user && state.user.role === 'admin';
+        const style = getCatStyles(cat);
+
+        const escapedStr = x.str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
+        return `
+            <li class="list-item group bg-card border border-border rounded-lg p-3 flex justify-between items-start shadow-sm animate-enter" style="animation-delay:${i * 0.03}s">
                 <div class="flex-1 min-w-0">
                     <div class="flex flex-wrap items-center gap-2 mb-1">
                         <span class="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded border flex items-center gap-1 ${style.class}">
                             <i class="bi ${style.icon}"></i> ${cat}
                         </span>
                         <div class="text-[10px] text-muted-foreground flex items-center gap-1">
-                           ${x.d}
+                           ${x.d} ${x.s === 'night' ? '<i class="bi bi-moon-stars-fill text-blue-400"></i>' : ''}
                         </div>
                     </div>
                     <div class="flex flex-col sm:flex-row sm:items-center gap-1">
@@ -722,345 +1530,315 @@
                     </div>
                 </div>
                 <div class="flex gap-2 items-center ml-2 mt-1">
-                    <button onclick="copyTxt('${x.str}')" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted text-muted-foreground transition-colors"><i class="bi bi-copy"></i></button>
-                    ${state.isLoggedIn && isMe ? `
-                    <button onclick="openEdit('${x.str}')" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-blue-50 text-blue-500 transition-colors"><i class="bi bi-pencil-square"></i></button>
-                    <button onclick="delItem('${x.str}')" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-50 text-destructive transition-colors"><i class="bi bi-trash"></i></button>
+                    <button onclick="copyTxt('${escapedStr}')" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted text-muted-foreground transition-colors"><i class="bi bi-copy"></i></button>
+                    ${(state.isLoggedIn && (isMe || isAdmin)) ? `
+                    <button onclick="openEdit('${escapedStr}')" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-blue-50 text-blue-500 transition-colors"><i class="bi bi-pencil-square"></i></button>
+                    <button onclick="delItem('${escapedStr}')" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-50 text-destructive transition-colors"><i class="bi bi-trash"></i></button>
                     ` : ''}
                 </div>
             </li>`;
-        }).join('');
-    }
+    }).join('');
+}
 
-    // ============================================================
-    // PDF রিপোর্ট জেনারেটর
-    // ============================================================
-    async function downloadPDF() {
-        if(!state.isLoggedIn) return showToast('রিপোর্ট ডাউনলোড করতে লগইন করুন', 'error');
-        
-        const list = (state.data[state.date] && state.data[state.date][state.shift]) || [];
-        if(!list.length) return showToast('রিপোর্ট তৈরির জন্য কোন তথ্য নেই', 'error');
+// --- PDF ---
+async function downloadPDF() {
+    if (!state.isLoggedIn) return showToast('রিপোর্ট ডাউনলোড করতে লগইন করুন', 'error');
+    const list = (state.data[state.date] && state.data[state.date][state.shift]) || [];
+    if (!list.length) return showToast('রিপোর্ট তৈরির জন্য কোন তথ্য নেই', 'error');
 
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        
-        doc.setFontSize(18);
-        doc.text("Blasting Production Report", 14, 20);
-        
-        doc.setFontSize(10);
-        doc.text(`Date: ${state.date}`, 14, 30);
-        doc.text(`Shift: ${state.shift === 'day' ? 'Day' : 'Night'}`, 14, 35);
-        doc.text(`Generated By: ${state.user}`, 14, 40);
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
 
-        const total = list.length;
-        
-        doc.setDrawColor(200);
-        doc.setFillColor(245, 245, 245);
-        doc.rect(130, 15, 65, 18, 'F');
-        doc.text("Summary:", 135, 22);
-        doc.text(`Total Items: ${total}`, 135, 28);
+    doc.setFontSize(18);
+    doc.text("Blasting Production Report", 14, 20);
+    doc.setFontSize(10);
+    doc.text(`Date: ${state.date}`, 14, 30);
+    doc.text(`Shift: ${state.shift === 'day' ? 'Day' : 'Night'}`, 14, 35);
+    doc.text(`Generated By: ${state.user.displayName || state.user.username}`, 14, 40);
 
-        const tableBody = list.map((item, index) => {
-            const { cat, num } = parseItem(item);
-            return [index + 1, cat, num];
+    const total = list.length;
+    doc.setDrawColor(200);
+    doc.setFillColor(245, 245, 245);
+    doc.rect(130, 15, 65, 18, 'F');
+    doc.text("Summary:", 135, 22);
+    doc.text(`Total Items: ${total}`, 135, 28);
+
+    const tableBody = list.map((item, index) => {
+        const { cat, num } = parseItem(item);
+        return [index + 1, cat, num];
+    });
+
+    doc.autoTable({
+        startY: 50,
+        head: [['#', 'Category', 'Code / Details']],
+        body: tableBody,
+        theme: 'grid',
+        headStyles: { fillColor: [40, 40, 40] },
+        alternateRowStyles: { fillColor: [240, 240, 240] },
+    });
+
+    const finalY = doc.lastAutoTable.finalY || 60;
+    doc.text("_______________________", 140, finalY + 30);
+    doc.text("Manager Signature", 145, finalY + 36);
+    doc.setFontSize(8);
+    doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 285);
+
+    doc.save(`Report_${state.date}_${state.shift}.pdf`);
+    closeModal('tools-modal');
+    await logActivity('add', `PDF রিপোর্ট ডাউনলোড করা হয়েছে (${state.date})`);
+    showToast('PDF রিপোর্ট ডাউনলোড হয়েছে', 'success');
+}
+
+// --- Scanner ---
+let stream = null;
+async function startScanner() {
+    if (!state.isLoggedIn) return showToast('স্ক্যান করতে লগইন করুন', 'error');
+    const modal = document.getElementById('scanner-modal');
+    const video = document.getElementById('scan-video');
+    try {
+        modal.classList.add('active');
+        stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: "environment", width: { ideal: 1920 }, height: { ideal: 1080 } }
         });
+        video.srcObject = stream;
+    } catch (err) {
+        console.error(err);
+        stopScanner();
+        showToast('ক্যামেরা চালু করা যায়নি', 'error');
+    }
+}
 
-        doc.autoTable({
-            startY: 50,
-            head: [['#', 'Category', 'Code / Details']],
-            body: tableBody,
-            theme: 'grid',
-            headStyles: { fillColor: [40, 40, 40] },
-            alternateRowStyles: { fillColor: [240, 240, 240] },
+function stopScanner() {
+    const modal = document.getElementById('scanner-modal');
+    const video = document.getElementById('scan-video');
+    const loading = document.getElementById('scan-loading');
+    modal.classList.remove('active');
+    loading.classList.add('hidden');
+    if (stream) { stream.getTracks().forEach(track => track.stop()); stream = null; }
+    video.srcObject = null;
+}
+
+async function captureAndProcess() {
+    const video = document.getElementById('scan-video');
+    const canvas = document.getElementById('scan-canvas');
+    const loading = document.getElementById('scan-loading');
+    if (!stream) return;
+
+    const scale = 2;
+    const w = video.videoWidth * scale;
+    const h = video.videoHeight * scale;
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, w, h);
+
+    const d = ctx.getImageData(0, 0, w, h);
+    const data = d.data;
+    for (let i = 0; i < data.length; i += 4) {
+        const r = data[i], g = data[i + 1], b = data[i + 2];
+        const v = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        const threshold = 90;
+        const bin = (v < threshold) ? 0 : 255;
+        data[i] = bin; data[i + 1] = bin; data[i + 2] = bin;
+    }
+    ctx.putImageData(d, 0, 0);
+
+    loading.classList.remove('hidden');
+    try {
+        const result = await Tesseract.recognize(canvas, 'eng', {
+            logger: m => console.log(m),
+            tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789- '
         });
+        const text = result.data.text;
+        const cleanText = text.replace(/\n/g, ' ').trim();
+        const pattern = /([A-Z0-9]+(?:\s+[A-Z0-9]+)+)/;
+        const match = cleanText.match(pattern);
 
-        const finalY = doc.lastAutoTable.finalY || 60;
-        doc.text("_______________________", 140, finalY + 30);
-        doc.text("Manager Signature", 145, finalY + 36);
-        doc.setFontSize(8);
-        doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 285);
-
-        doc.save(`Report_${state.date}_${state.shift}.pdf`);
-        closeModal('tools-modal');
-        showToast('PDF রিপোর্ট ডাউনলোড হয়েছে', 'success');
-    }
-
-    // ============================================================
-    // OCR ক্যামেরা স্ক্যানার
-    // ============================================================
-    let stream = null;
-    async function startScanner() {
-        if (!state.isLoggedIn) return showToast('স্ক্যান করতে লগইন করুন', 'error');
-        const modal = document.getElementById('scanner-modal');
-        const video = document.getElementById('scan-video');
-        try {
-            modal.classList.add('active');
-            stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { 
-                    facingMode: "environment",
-                    width: { ideal: 1920 }, 
-                    height: { ideal: 1080 } 
-                } 
-            });
-            video.srcObject = stream;
-        } catch (err) {
-            console.error(err);
-            stopScanner();
-            showToast('ক্যামেরা চালু করা যায়নি (HTTPS প্রয়োজন)', 'error');
-        }
-    }
-
-    function stopScanner() {
-        const modal = document.getElementById('scanner-modal');
-        const video = document.getElementById('scan-video');
-        const loading = document.getElementById('scan-loading');
-        modal.classList.remove('active');
-        loading.classList.add('hidden');
-        if (stream) { stream.getTracks().forEach(track => track.stop()); stream = null; }
-        video.srcObject = null;
-    }
-
-    async function captureAndProcess() {
-        const video = document.getElementById('scan-video');
-        const canvas = document.getElementById('scan-canvas');
-        const loading = document.getElementById('scan-loading');
-        if (!stream) return;
-
-        const scale = 2;
-        const w = video.videoWidth * scale;
-        const h = video.videoHeight * scale;
-        
-        canvas.width = w;
-        canvas.height = h;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(video, 0, 0, w, h);
-        
-        const d = ctx.getImageData(0, 0, w, h);
-        const data = d.data;
-        
-        for (let i = 0; i < data.length; i += 4) {
-            const r = data[i];
-            const g = data[i+1];
-            const b = data[i+2];
-            const v = 0.2126*r + 0.7152*g + 0.0722*b;
-            const threshold = 90;
-            const bin = (v < threshold) ? 0 : 255;
-            data[i] = bin;
-            data[i+1] = bin;
-            data[i+2] = bin;
-        }
-        
-        ctx.putImageData(d, 0, 0);
-        loading.classList.remove('hidden');
-        
-        try {
-            const result = await Tesseract.recognize(canvas, 'eng', { 
-                logger: m => console.log(m),
-                tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789- ' 
-            });
-            
-            const text = result.data.text;
-            console.log("Raw OCR:", text);
-            
-            const cleanText = text.replace(/\n/g, ' ').trim();
-            const pattern = /([A-Z0-9]+(?:\s+[A-Z0-9]+)+)/;
-            const match = cleanText.match(pattern);
-            
-            if (match) {
-                let rawCode = match[1];
-                let formattedCode = rawCode.replace(/\s+/g, '-');
-                
-                let extra = "";
-                const qtyMatch = cleanText.match(/(\d+\/\d+|\d+\s*pcs|\d+\s*pic)/i);
-                if (qtyMatch) {
-                    extra = qtyMatch[0];
-                    formattedCode = formattedCode.replace(new RegExp('-' + extra.replace('/', '-'), 'i'), '');
-                    extra = formatExtraText(extra);
-                }
-
-                const finalVal = extra ? `${formattedCode} ${extra}` : formattedCode;
-                els.input.value = finalVal;
-                playSound('success');
-                showToast(`স্ক্যান হয়েছে: ${finalVal}`, 'success');
-                stopScanner();
-            } else {
-                showToast('কোড অস্পষ্ট। আবার চেষ্টা করুন।', 'warning');
-                loading.classList.add('hidden');
+        if (match) {
+            let rawCode = match[1];
+            let formattedCode = rawCode.replace(/\s+/g, '-');
+            let extra = "";
+            const qtyMatch = cleanText.match(/(\d+\/\d+|\d+\s*pcs|\d+\s*pic)/i);
+            if (qtyMatch) {
+                extra = qtyMatch[0];
+                formattedCode = formattedCode.replace(new RegExp('-' + extra.replace('/', '-'), 'i'), '');
+                extra = formatExtraText(extra);
             }
-        } catch (err) {
-            console.error(err);
-            showToast('এরর: ' + err.message, 'error');
+            const finalVal = extra ? `${formattedCode} ${extra}` : formattedCode;
+            els.input.value = finalVal;
+            playSound('success');
+            showToast(`স্ক্যান হয়েছে: ${finalVal}`, 'success');
+            stopScanner();
+        } else {
+            showToast('কোড অস্পষ্ট। আবার চেষ্টা করুন।', 'warning');
             loading.classList.add('hidden');
         }
+    } catch (err) {
+        console.error(err);
+        showToast('এরর: ' + err.message, 'error');
+        loading.classList.add('hidden');
     }
+}
 
-    // ============================================================
-    // ইউটিলিটি ফাংশন
-    // ============================================================
-    function parseItem(str) { const parts = str.split(' '); return { cat: parts[0], num: parts.slice(1).join(' ') }; }
+// --- Utility ---
+function parseItem(str) { const parts = str.split(' '); return { cat: parts[0], num: parts.slice(1).join(' ') }; }
 
-    function showToast(msg, type = 'default') {
-        const container = document.getElementById('toast-container');
-        const icons = { success: '<i class="bi bi-check-circle-fill text-green-500"></i>', error: '<i class="bi bi-x-circle-fill text-red-500"></i>', warning: '<i class="bi bi-exclamation-triangle-fill text-yellow-500"></i>', default: '<i class="bi bi-info-circle-fill text-blue-500"></i>' };
-        const t = document.createElement('div'); t.className = `shadcn-toast toast-${type} animate-toast-enter`;
-        t.innerHTML = `<div class="mt-0.5 text-lg">${icons[type]||icons.default}</div><div class="flex-1"><p class="text-sm font-medium">${msg}</p></div>`;
-        container.appendChild(t); setTimeout(() => { t.style.animation='toast-swipe-out 0.2s ease-in forwards'; setTimeout(()=>t.remove(),200); }, 3000);
-    }
-    
-    function openConfirm(t,m){return new Promise(r=>{const el=document.getElementById('confirm-modal');document.getElementById('confirm-title').innerText=t;document.getElementById('confirm-desc').innerText=m;el.classList.add('active');const ok=()=>{c();r(true)};const no=()=>{c();r(false)};const c=()=>{document.getElementById('confirm-ok').removeEventListener('click',ok);document.getElementById('confirm-cancel').removeEventListener('click',no);el.classList.remove('active')};document.getElementById('confirm-ok').addEventListener('click',ok);document.getElementById('confirm-cancel').addEventListener('click',no)})}
+function showToast(msg, type = 'default') {
+    const container = document.getElementById('toast-container');
+    const icons = { success: '<i class="bi bi-check-circle-fill text-green-500"></i>', error: '<i class="bi bi-x-circle-fill text-red-500"></i>', warning: '<i class="bi bi-exclamation-triangle-fill text-yellow-500"></i>', default: '<i class="bi bi-info-circle-fill text-blue-500"></i>' };
+    const t = document.createElement('div');
+    t.className = `shadcn-toast toast-${type}`;
+    t.style.animation = 'toast-slide-in 0.25s ease-out forwards';
+    t.innerHTML = `<div class="mt-0.5 text-lg">${icons[type] || icons.default}</div><div class="flex-1"><p class="text-sm font-medium">${msg}</p></div>`;
+    container.appendChild(t);
+    setTimeout(() => {
+        t.style.animation = 'toast-swipe-out 0.2s ease-in forwards';
+        setTimeout(() => t.remove(), 200);
+    }, 3000);
+}
 
-    async function delItem(str){
-        if(await openConfirm('মুছে ফেলবেন?','এই আইটেমটি পারমানেন্টলি ডিলিট হবে।')){
-            const l=state.data[state.date][state.shift].filter(i=>i!==str);
-            state.data[state.date][state.shift]=l;
-            render();
-            await updateRemote(state.date,state.shift,l);
-            showToast('ডিলিট হয়েছে','success');
-        }
-    }
+function openConfirm(t, m) {
+    return new Promise(r => {
+        const el = document.getElementById('confirm-modal');
+        document.getElementById('confirm-title').innerText = t;
+        document.getElementById('confirm-desc').innerText = m;
+        el.classList.add('active');
+        const ok = () => { c(); r(true); };
+        const no = () => { c(); r(false); };
+        const c = () => {
+            document.getElementById('confirm-ok').removeEventListener('click', ok);
+            document.getElementById('confirm-cancel').removeEventListener('click', no);
+            el.classList.remove('active');
+        };
+        document.getElementById('confirm-ok').addEventListener('click', ok);
+        document.getElementById('confirm-cancel').addEventListener('click', no);
+    });
+}
 
-    function openEdit(str){
-        const {cat,num}=parseItem(str);
-        document.getElementById('edit-original').value=str;
-        document.getElementById('edit-cat').value=cat;
-        document.getElementById('edit-num').value=num;
-        openModal('edit-modal');
-    }
-
-    async function saveEdit(){
-        const o=document.getElementById('edit-original').value;
-        const nc=document.getElementById('edit-cat').value;
-        const nn=document.getElementById('edit-num').value.trim();
-        if(!nn) return;
-        let formattedNum = nn;
-        const match = nn.match(/^([a-zA-Z0-9\-]+)(.*)$/);
-        if (match) {
-             const cp = match[1].toUpperCase();
-             let ep = match[2];
-             ep = formatExtraText(ep);
-             formattedNum = ep ? `${cp}${ep}` : cp;
-        }
-        const l=[...state.data[state.date][state.shift]];
-        const i=l.indexOf(o);
-        if(i>-1){
-            l[i]=`${nc} ${formattedNum}`;
-            state.data[state.date][state.shift]=l;
-            render();
-            await updateRemote(state.date,state.shift,l);
-            showToast('আপডেট হয়েছে','success');
-            closeModal('edit-modal');
-        }
-    }
-
-    // ============================================================
-    // লগইন / লগআউট
-    // ============================================================
-    function login(){
-        const u=document.getElementById('username').value;
-        const p=document.getElementById('password').value;
-        if(VALID_USERS[u]===p){
-            state.isLoggedIn=true;
-            state.user=u;
-            localStorage.setItem('isLoggedIn','true');
-            localStorage.setItem('loggedInUser',u);
-            updateAuth();
-            closeModal('settings-modal');
-            showToast('লগইন সফল','success');
-        } else {
-            showToast('ভুল তথ্য','error');
-        }
-    }
-
-    function logout(){
-        state.isLoggedIn=false;
-        localStorage.removeItem('isLoggedIn');
-        localStorage.removeItem('loggedInUser');
-        updateAuth();
-        closeModal('settings-modal');
-    }
-
-    function updateAuth(){
-        els.addBtn.disabled=!state.isLoggedIn;
-        document.getElementById('add-section').classList.toggle('opacity-50',!state.isLoggedIn);
-        document.getElementById('add-section').classList.toggle('pointer-events-none',!state.isLoggedIn);
-        document.getElementById('auth-message').classList.toggle('hidden',state.isLoggedIn);
-        document.getElementById('login-form').classList.toggle('hidden',state.isLoggedIn);
-        document.getElementById('profile-info').classList.toggle('hidden',!state.isLoggedIn);
-        if(state.isLoggedIn) document.getElementById('user-display').innerText=state.user;
+async function delItem(str) {
+    if (await openConfirm('মুছে ফেলবেন?', 'এই আইটেমটি পারমানেন্টলি ডিলিট হবে।')) {
+        const l = state.data[state.date][state.shift].filter(i => i !== str);
+        state.data[state.date][state.shift] = l;
         render();
+        await updateRemote(state.date, state.shift, l);
+        await logActivity('delete', `${parseItem(str).num} মুছে ফেলা হয়েছে`);
+        showToast('ডিলিট হয়েছে', 'success');
+    }
+}
+
+function openEdit(str) {
+    const { cat, num } = parseItem(str);
+    document.getElementById('edit-original').value = str;
+    document.getElementById('edit-cat').value = cat;
+    document.getElementById('edit-num').value = num;
+    openModal('edit-modal');
+}
+
+async function saveEdit() {
+    const o = document.getElementById('edit-original').value;
+    const nc = document.getElementById('edit-cat').value;
+    const nn = document.getElementById('edit-num').value.trim();
+    if (!nn) return;
+
+    let formattedNum = nn;
+    const match = nn.match(/^([a-zA-Z0-9\-]+)(.*)$/);
+    if (match) {
+        const cp = match[1].toUpperCase();
+        let ep = match[2];
+        ep = formatExtraText(ep);
+        formattedNum = ep ? `${cp}${ep}` : cp;
     }
 
-    // ============================================================
-    // থিম টগল
-    // ============================================================
-    function toggleTheme(){
-        document.documentElement.classList.toggle('dark');
-        localStorage.setItem('theme',document.documentElement.classList.contains('dark')?'dark':'light');
-        applyTheme();
+    // Duplicate check on edit (skip self)
+    const dup = checkDuplicate(formattedNum);
+    if (dup && !(dup.d === state.date && dup.s === state.shift)) {
+        playSound('error');
+        showToast(`এই নাম্বারটি ${dup.d} তারিখে আছে!`, 'error');
+        return;
     }
 
-    function applyTheme(){
-        const d=localStorage.getItem('theme')==='dark';
-        document.documentElement.classList.toggle('dark',d);
-        document.getElementById('theme-icon').className=d?'bi bi-sun-fill':'bi bi-moon-stars';
-    }
-
-    // ============================================================
-    // মোডাল ও ন্যাভিগেশন
-    // ============================================================
-    function openModal(id){document.getElementById(id).classList.add('active')}
-    function closeModal(id){document.getElementById(id).classList.remove('active');if(id==='scanner-modal')stopScanner()}
-
-    function navTo(t){
-        if(t==='list') window.scrollTo({top:0,behavior:'smooth'});
-        if(t==='add'){document.getElementById('controls-card').scrollIntoView({behavior:'smooth'});els.input.focus()}
-        if(t==='search'){window.scrollTo({top:0,behavior:'smooth'});els.search.focus()}
-    }
-
-    // ============================================================
-    // কপি, CSV, WhatsApp শেয়ার
-    // ============================================================
-    function copyTxt(s){
-        const{num}=parseItem(s);
-        navigator.clipboard.writeText(num).then(()=>showToast('কপি হয়েছে','success'));
-    }
-
-    function copyAll(){
-        const l=(state.data[state.date]&&state.data[state.date][state.shift])||[];
-        if(!l.length) return;
-        navigator.clipboard.writeText(l.map(i=>parseItem(i).num).join('\n')).then(()=>showToast('সব কপি হয়েছে','success'));
-    }
-
-    function downloadCSV(){
-        const l=(state.data[state.date]&&state.data[state.date][state.shift])||[];
-        if(!l.length) return;
-        let c="Category,Details\n"+l.map(i=>{const{cat,num}=parseItem(i);return`"${cat}","${num}"`}).join('\n');
-        const a=document.createElement('a');
-        a.href=URL.createObjectURL(new Blob([c],{type:'text/csv'}));
-        a.download=`BlastingList_${state.date}.csv`;
-        a.click();
-        closeModal('tools-modal');
-    }
-
-    function toggleSearchScope(){
-        state.scope=state.scope==='current'?'all':'current';
-        els.scopeBtn.innerText=state.scope==='current'?'বর্তমান':'সব';
+    const l = [...state.data[state.date][state.shift]];
+    const i = l.indexOf(o);
+    if (i > -1) {
+        l[i] = `${nc} ${formattedNum}`;
+        state.data[state.date][state.shift] = l;
         render();
+        await updateRemote(state.date, state.shift, l);
+        await logActivity('edit', `${o} থেকে ${l[i]} আপডেট হয়েছে`);
+        showToast('আপডেট হয়েছে', 'success');
+        closeModal('edit-modal');
     }
+}
 
-    function shareToWhatsApp(){
-        const l=(state.data[state.date]&&state.data[state.date][state.shift])||[];
-        if(!l.length) return;
-        let m=`🏭 *ব্লাস্টিং লিস্ট*\n📅 ${state.date} (${state.shift=='day'?'দিন':'রাত'})\n\n`;
-        l.forEach(i=>{const{cat,num}=parseItem(i);m+=`▪️ [${cat}] ${num}\n`});
-        window.open(`https://wa.me/?text=${encodeURIComponent(m)}`,'_blank');
-        closeModal('tools-modal');
-    }
+function toggleTheme() {
+    document.documentElement.classList.toggle('dark');
+    localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+    applyTheme();
+}
 
-    // ============================================================
-    // অ্যাপ শুরু
-    // ============================================================
-    init();
+function applyTheme() {
+    const d = localStorage.getItem('theme') === 'dark';
+    document.documentElement.classList.toggle('dark', d);
+    document.getElementById('theme-icon').className = d ? 'bi bi-sun-fill' : 'bi bi-moon-stars';
+}
+
+function openModal(id) { document.getElementById(id).classList.add('active'); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); if (id === 'scanner-modal') stopScanner(); }
+
+function navTo(t) {
+    if (t === 'list') window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (t === 'add') { document.getElementById('controls-card').scrollIntoView({ behavior: 'smooth' }); els.input.focus(); }
+}
+
+function copyTxt(s) {
+    const { num } = parseItem(s);
+    navigator.clipboard.writeText(num).then(() => showToast('কপি হয়েছে', 'success'));
+}
+
+function copyAll() {
+    const l = (state.data[state.date] && state.data[state.date][state.shift]) || [];
+    if (!l.length) return;
+    navigator.clipboard.writeText(l.map(i => parseItem(i).num).join('\n')).then(() => showToast('সব কপি হয়েছে', 'success'));
+}
+
+function downloadCSV() {
+    if (!state.isLoggedIn) return showToast('এক্সপোর্ট করতে লগইন করুন', 'error');
+    const l = (state.data[state.date] && state.data[state.date][state.shift]) || [];
+    if (!l.length) return;
+    // Proper CSV escaping
+    let c = "Category,Details\n";
+    l.forEach(item => {
+        const { cat, num } = parseItem(item);
+        const escapedNum = num.includes(',') ? `"${num}"` : num;
+        c += `${cat},${escapedNum}\n`;
+    });
+    const blob = new Blob(['\uFEFF' + c], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `BlastingList_${state.date}.csv`;
+    a.click();
+    closeModal('tools-modal');
+    showToast('CSV ডাউনলোড হয়েছে', 'success');
+}
+
+function toggleSearchScope() {
+    state.scope = state.scope === 'current' ? 'all' : 'current';
+    els.scopeBtn.innerText = state.scope === 'current' ? 'বর্তমান' : 'সব';
+    render();
+}
+
+function shareToWhatsApp() {
+    if (!state.isLoggedIn) return showToast('শেয়ার করতে লগইন করুন', 'error');
+    const l = (state.data[state.date] && state.data[state.date][state.shift]) || [];
+    if (!l.length) return;
+    let m = `🏭 *ব্লাস্টিং লিস্ট*\n📅 ${state.date} (${state.shift == 'day' ? 'দিন' : 'রাত'})\n\n`;
+    l.forEach(i => { const { cat, num } = parseItem(i); m += `▪️ [${cat}] ${num}\n`; });
+    window.open(`https://wa.me/?text=${encodeURIComponent(m)}`, '_blank');
+    closeModal('tools-modal');
+}
+
+// ========== INIT ==========
+init();
 </script>
 </body>
 </html>
