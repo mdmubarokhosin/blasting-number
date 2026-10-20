@@ -1,0 +1,332 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "profiles": {
+      ".read": "(auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && ((root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('users_view').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('users_view').val() === true)\n    ) || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('dashboard_view').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('dashboard_view').val() === true)\n    )))",
+      "$uid": {
+        ".read": "(auth != null && auth.uid === $uid) || (auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && ((root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('users_view').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('users_view').val() === true)\n    ) || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('dashboard_view').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('dashboard_view').val() === true)\n    )))",
+        ".write": "(auth != null && (\n          (auth.uid === $uid && newData.exists() && (\n            (!data.exists() && newData.child('role').val() === 'viewer' && newData.child('active').val() === true) ||\n            (data.exists() && root.child('profiles').child(auth.uid).child('active').val() === true)\n          )) ||\n          (!data.exists() && newData.exists() && (auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && ((root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('users_create').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('users_create').val() === true)\n    )))) ||\n          (data.exists() && newData.exists() && ((auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && ((root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('users_edit').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('users_edit').val() === true)\n    ))) || (auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && ((root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('users_assignRole').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('users_assignRole').val() === true)\n    ))) || (auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && ((root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('users_disable').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('users_disable').val() === true)\n    )))))\n        ))",
+        ".validate": "!newData.exists() || newData.hasChildren(['uid','email','displayName','role','active','createdAt'])",
+        "uid": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val() === $uid && (!data.exists() || newData.val() === data.val()))"
+        },
+        "email": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 254 && (newData.val() === data.val() || (!data.exists() && (newData.val() === auth.token.email || (auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && ((root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('users_create').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('users_create').val() === true)\n    )))))))"
+        },
+        "displayName": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length >= 2 && newData.val().length <= 60)"
+        },
+        "role": {
+          ".validate": "!newData.exists() || newData.val() === data.val() || (\n          auth.uid !== $uid &&\n          newData.isString() &&\n          newData.val() !== 'admin' && newData.val() !== 'user' &&\n          root.child('roles').child(newData.val()).child('status').val() === 'active' &&\n          (newData.val() !== 'master-admin' || (root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin')) &&\n          (!data.exists() || ((data.val() !== 'admin' && data.val() !== 'master-admin') || (root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin'))) &&\n          ((!data.exists() && (auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && ((root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('users_create').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('users_create').val() === true)\n    )))) || (data.exists() && (auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && ((root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('users_assignRole').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('users_assignRole').val() === true)\n    )))))\n        ) || (!data.exists() && auth.uid === $uid && newData.val() === 'viewer')"
+        },
+        "active": {
+          ".validate": "!newData.exists() || newData.val() === data.val() || (\n          newData.isBoolean() &&\n          (\n            (!data.exists() && auth.uid === $uid && newData.val() === true) ||\n            (auth.uid !== $uid && (\n              (!data.exists() && (auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && ((root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('users_create').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('users_create').val() === true)\n    )))) ||\n              (data.exists() && (auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && ((root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('users_disable').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('users_disable').val() === true)\n    ))))\n            ) && (newData.val() !== false || (root.child('profiles').child($uid).child('role').val() !== 'master-admin' && root.child('profiles').child($uid).child('role').val() !== 'admin')))\n          )\n        )"
+        },
+        "createdAt": {
+          ".validate": "!newData.exists() || (newData.isNumber() && (!data.exists() || newData.val() === data.val()))"
+        },
+        "lastLogin": {
+          ".validate": "!newData.exists() || newData.isNumber()"
+        },
+        "updatedAt": {
+          ".validate": "!newData.exists() || newData.isNumber()"
+        }
+      }
+    },
+    "roles": {
+      ".read": "auth != null && root.child('profiles').child(auth.uid).child('active').val() === true",
+      "$roleId": {
+        ".write": "(auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && $roleId !== 'admin' && $roleId !== 'user' &&\n          (root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') &&\n          (newData.exists() || (data.child('protected').val() !== true && data.child('isSystemRole').val() !== true && data.child('assignedUserCount').val() === 0)))",
+        ".validate": "!newData.exists() || newData.hasChildren(['name','status','sortOrder'])",
+        "name": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length >= 2 && newData.val().length <= 60)"
+        },
+        "description": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 200)"
+        },
+        "color": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/))"
+        },
+        "icon": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length >= 1 && newData.val().length <= 60)"
+        },
+        "status": {
+          ".validate": "!newData.exists() || (($roleId === 'master-admin') ? newData.val() === 'active' : (newData.val() === 'active' || newData.val() === 'inactive'))"
+        },
+        "permissions": {
+          "$permissionKey": {
+            ".validate": "!newData.exists() || newData.val() === true"
+          }
+        },
+        "isSystemRole": {
+          ".validate": "!newData.exists() || (newData.isBoolean() && (($roleId === 'master-admin') ? newData.val() === true : true))"
+        },
+        "protected": {
+          ".validate": "!newData.exists() || (newData.isBoolean() && (($roleId === 'master-admin') ? newData.val() === true : true))"
+        },
+        "sortOrder": {
+          ".validate": "!newData.exists() || (newData.isNumber() && newData.val() >= 0 && newData.val() <= 9999)"
+        },
+        "assignedUserCount": {
+          ".write": "auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && ((root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('users_assignRole').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('users_assignRole').val() === true)\n    ))",
+          ".validate": "!newData.exists() || (newData.isNumber() && newData.val() >= 0)"
+        },
+        "createdAt": {
+          ".validate": "!newData.exists() || (newData.isNumber() && (!data.exists() || newData.val() === data.val()))"
+        },
+        "updatedAt": {
+          ".write": "auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && ((root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('users_assignRole').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('users_assignRole').val() === true)\n    ))",
+          ".validate": "!newData.exists() || newData.isNumber()"
+        },
+        "createdBy": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 128)"
+        }
+      }
+    },
+    "categories": {
+      ".read": "(auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && ((root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('categories_view').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('categories_view').val() === true)\n    )))",
+      "$categoryId": {
+        ".write": "(auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && (\n          (!data.exists() && newData.exists() && (auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && ((root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('categories_create').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('categories_create').val() === true)\n    )))) ||\n          (data.exists() && newData.exists() && (auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && ((root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('categories_edit').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('categories_edit').val() === true)\n    )))) ||\n          (data.exists() && !newData.exists() && (auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && ((root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('categories_delete').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('categories_delete').val() === true)\n    ))))\n        ))",
+        ".validate": "!newData.exists() || newData.hasChildren(['name','slug','status','color','icon','sortOrder'])",
+        "name": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length >= 1 && newData.val().length <= 40)"
+        },
+        "slug": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().matches(/^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$/) && (!data.exists() || newData.val() === data.val()))"
+        },
+        "description": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 200)"
+        },
+        "color": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/) && (newData.val() === data.val() || (!data.exists() && (auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && ((root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('categories_create').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('categories_create').val() === true)\n    )))) || (auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && ((root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('categories_manageAppearance').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('categories_manageAppearance').val() === true)\n    )))))"
+        },
+        "icon": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length >= 1 && newData.val().length <= 60 && (newData.val() === data.val() || (!data.exists() && (auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && ((root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('categories_create').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('categories_create').val() === true)\n    )))) || (auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && ((root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('categories_manageAppearance').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('categories_manageAppearance').val() === true)\n    )))))"
+        },
+        "status": {
+          ".validate": "!newData.exists() || newData.val() === 'active' || newData.val() === 'inactive'"
+        },
+        "sortOrder": {
+          ".validate": "!newData.exists() || (newData.isNumber() && newData.val() >= 0 && newData.val() <= 9999)"
+        },
+        "createdAt": {
+          ".validate": "!newData.exists() || (newData.isNumber() && (!data.exists() || newData.val() === data.val()))"
+        },
+        "updatedAt": {
+          ".validate": "!newData.exists() || newData.isNumber()"
+        },
+        "createdBy": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 128)"
+        }
+      }
+    },
+    "shifts": {
+      ".read": "auth != null && root.child('profiles').child(auth.uid).child('active').val() === true",
+      "$shiftId": {
+        ".write": "(auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && $shiftId.matches(/^[a-zA-Z0-9][a-zA-Z0-9-]{0,63}$/) && (\n          (!data.exists() && newData.exists() && (auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && ((root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('shifts_create').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('shifts_create').val() === true)\n    )))) ||\n          (data.exists() && newData.exists() && (auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && ((root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('shifts_edit').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('shifts_edit').val() === true)\n    )))) ||\n          (data.exists() && !newData.exists() && (auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && ((root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('shifts_delete').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('shifts_delete').val() === true)\n    ))) && $shiftId !== 'day' && $shiftId !== 'night')\n        ))",
+        ".validate": "!newData.exists() || (\n          newData.hasChildren(['name','status','color','icon','sortOrder']) &&\n          (((!newData.child('startTime').exists() || newData.child('startTime').val() === '') &&\n          (!newData.child('endTime').exists() || newData.child('endTime').val() === '')) ||\n         (newData.child('startTime').isString() && newData.child('startTime').val().matches(/^([01]\\d|2[0-3]):[0-5]\\d$/) &&\n          newData.child('endTime').isString() && newData.child('endTime').val().matches(/^([01]\\d|2[0-3]):[0-5]\\d$/)))\n        )",
+        "name": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length >= 1 && newData.val().length <= 40)"
+        },
+        "description": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 200)"
+        },
+        "startTime": {
+          ".validate": "!newData.exists() || (newData.isString() && (newData.val() === '' || newData.val().matches(/^([01]\\d|2[0-3]):[0-5]\\d$/)))"
+        },
+        "endTime": {
+          ".validate": "!newData.exists() || (newData.isString() && (newData.val() === '' || newData.val().matches(/^([01]\\d|2[0-3]):[0-5]\\d$/)))"
+        },
+        "color": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/) && (newData.val() === data.val() || (!data.exists() && (auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && ((root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('shifts_create').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('shifts_create').val() === true)\n    )))) || (auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && ((root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('shifts_manageAppearance').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('shifts_manageAppearance').val() === true)\n    )))))"
+        },
+        "icon": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length >= 1 && newData.val().length <= 60 && (newData.val() === data.val() || (!data.exists() && (auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && ((root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('shifts_create').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('shifts_create').val() === true)\n    )))) || (auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && ((root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('shifts_manageAppearance').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('shifts_manageAppearance').val() === true)\n    )))))"
+        },
+        "status": {
+          ".validate": "!newData.exists() || newData.val() === 'active' || newData.val() === 'inactive'"
+        },
+        "sortOrder": {
+          ".validate": "!newData.exists() || (newData.isNumber() && newData.val() >= 0 && newData.val() <= 9999)"
+        },
+        "createdAt": {
+          ".validate": "!newData.exists() || (newData.isNumber() && (!data.exists() || newData.val() === data.val()))"
+        },
+        "updatedAt": {
+          ".validate": "!newData.exists() || newData.isNumber()"
+        },
+        "createdBy": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 128)"
+        }
+      }
+    },
+    "lists": {
+      ".read": "(auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && ((root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('lists_view').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('lists_view').val() === true)\n    ) || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('dashboard_view').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('dashboard_view').val() === true)\n    )))",
+      "$listId": {
+        ".read": "(auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && ((root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('lists_view').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('lists_view').val() === true)\n    ) || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('dashboard_view').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('dashboard_view').val() === true)\n    )))",
+        ".write": "(auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && (\n          (!data.exists() && newData.exists() && (auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && ((root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('lists_create').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('lists_create').val() === true)\n    ))) && newData.child('ownerId').val() === auth.uid) ||\n          (data.exists() && newData.exists() && ((auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && ((root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('lists_editAny').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('lists_editAny').val() === true)\n    ))) || ((auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && ((root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('lists_editOwn').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('lists_editOwn').val() === true)\n    ))) && data.child('ownerId').val() === auth.uid))) ||\n          (data.exists() && !newData.exists() && ((auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && ((root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('lists_deleteAny').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('lists_deleteAny').val() === true)\n    ))) || ((auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && ((root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('lists_deleteOwn').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('lists_deleteOwn').val() === true)\n    ))) && data.child('ownerId').val() === auth.uid)))\n        ))",
+        ".validate": "!newData.exists() || newData.hasChildren(['date','shift','ownerId','ownerName','createdAt'])",
+        "date": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().matches(/^\\d{4}-\\d{2}-\\d{2}$/))"
+        },
+        "shift": {
+          ".validate": "!newData.exists() || (\n          newData.val() === data.val() ||\n          (newData.isString() &&\n           newData.val().matches(/^[a-zA-Z0-9][a-zA-Z0-9-]{0,63}$/) &&\n           (root.child('shifts').child(newData.val()).child('status').val() === 'active' ||\n            (!root.child('shifts').exists() &&\n             (newData.val() === 'day' || newData.val() === 'night'))))\n        )"
+        },
+        "ownerId": {
+          ".validate": "!newData.exists() || (newData.isString() && ((!data.exists() && newData.val() === auth.uid) || (data.exists() && newData.val() === data.val())))"
+        },
+        "ownerName": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 100)"
+        },
+        "note": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 300)"
+        },
+        "createdAt": {
+          ".validate": "!newData.exists() || (newData.isNumber() && (!data.exists() || newData.val() === data.val()))"
+        },
+        "updatedAt": {
+          ".validate": "!newData.exists() || newData.isNumber()"
+        },
+        "items": {
+          "$itemId": {
+            ".validate": "!newData.exists() || newData.hasChildren(['category','code','createdBy','createdAt'])",
+            "categoryId": {
+              ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 128 && (newData.val() === data.val() || root.child('categories').child(newData.val()).child('status').val() === 'active'))"
+            },
+            "category": {
+              ".validate": "!newData.exists() || (newData.isString() && newData.val().length >= 1 && newData.val().length <= 60)"
+            },
+            "code": {
+              ".validate": "!newData.exists() || (newData.isString() && newData.val().length >= 1 && newData.val().length <= 200)"
+            },
+            "createdBy": {
+              ".validate": "!newData.exists() || (newData.isString() && (newData.val() === data.val() || (!data.exists() && newData.val() === auth.uid)))"
+            },
+            "createdByName": {
+              ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 100)"
+            },
+            "createdAt": {
+              ".validate": "!newData.exists() || (newData.isNumber() && (!data.exists() || newData.val() === data.val()))"
+            },
+            "updatedAt": {
+              ".validate": "!newData.exists() || newData.isNumber()"
+            }
+          }
+        }
+      }
+    },
+    "activityLogs": {
+      ".read": "(auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && ((root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('audit_view').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('audit_view').val() === true)\n    ) || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('dashboard_view').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('dashboard_view').val() === true)\n    )))",
+      ".indexOn": [
+        "timestamp"
+      ],
+      "$logId": {
+        ".write": "(auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && (\n          (!data.exists() && newData.exists() && newData.child('actorUid').val() === auth.uid) ||\n          (data.exists() && !newData.exists() && ((root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('audit_clear').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('audit_clear').val() === true)\n    )))\n        ))",
+        ".validate": "!newData.exists() || (newData.hasChildren(['action','details','actorUid','actorName','timestamp']) && newData.child('actorUid').val() === auth.uid && newData.child('timestamp').isNumber() && newData.child('action').isString() && newData.child('action').val().length <= 40 && newData.child('details').isString() && newData.child('details').val().length <= 500 && newData.child('actorName').isString() && newData.child('actorName').val().length <= 150)",
+        "outcome": {
+          ".validate": "!newData.exists() || newData.val() === 'success' || newData.val() === 'failure'"
+        },
+        "targetType": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 40)"
+        },
+        "targetId": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 128)"
+        },
+        "actorRole": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 60)"
+        }
+      }
+    },
+    "settings": {
+      ".read": true,
+      "app": {
+        ".validate": "!newData.exists() || (newData.child('brandName').isString() && newData.child('brandName').val().length >= 1 && newData.child('brandName').val().length <= 60 && newData.child('features').hasChildren(['pdfExport','csvExport','ocrScanner','whatsappShare']) && newData.child('features').child('pdfExport').isBoolean() && newData.child('features').child('csvExport').isBoolean() && newData.child('features').child('ocrScanner').isBoolean() && newData.child('features').child('whatsappShare').isBoolean() && (!newData.child('updatedAt').exists() || newData.child('updatedAt').isNumber()) && (!newData.child('updatedBy').exists() || (newData.child('updatedBy').isString() && newData.child('updatedBy').val().length <= 128)))",
+        "brandName": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length >= 1 && newData.val().length <= 60)"
+        },
+        "logoUrl": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 500)"
+        },
+        "contactEmail": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 254)"
+        },
+        "contactPhone": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 60)"
+        },
+        "contactAddress": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 300)"
+        },
+        "features": {
+          "pdfExport": {
+            ".validate": "!newData.exists() || newData.isBoolean()"
+          },
+          "csvExport": {
+            ".validate": "!newData.exists() || newData.isBoolean()"
+          },
+          "ocrScanner": {
+            ".validate": "!newData.exists() || newData.isBoolean()"
+          },
+          "whatsappShare": {
+            ".validate": "!newData.exists() || newData.isBoolean()"
+          }
+        },
+        "updatedAt": {
+          ".validate": "!newData.exists() || newData.isNumber()"
+        },
+        "updatedBy": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 128)"
+        },
+        ".write": "(auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && ((root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('settings_edit').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('settings_edit').val() === true)\n    )))"
+      },
+      "languages": {
+        "$code": {
+          ".write": "((auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && ((root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('settings_edit').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('settings_edit').val() === true)\n    )))) && ((newData.exists() && newData.child('code').val() === $code) || (!newData.exists() && data.child('isDefault').val() !== true && data.child('protected').val() !== true))",
+          ".validate": "!newData.exists() || (newData.hasChildren(['code','name','nativeName','direction','status','sortOrder']) && newData.child('code').val() === $code && ($code !== 'en' || (newData.child('status').val() === 'active' && newData.child('protected').val() === true)) && ($code !== 'bn' || newData.child('protected').val() === true) && (data.child('isDefault').val() !== true || newData.child('status').val() === 'active'))",
+          "code": {
+            ".validate": "!newData.exists() || (newData.isString() && newData.val() === $code && (!data.exists() || newData.val() === data.val()))"
+          },
+          "name": {
+            ".validate": "!newData.exists() || (newData.isString() && newData.val().length >= 2 && newData.val().length <= 60)"
+          },
+          "nativeName": {
+            ".validate": "!newData.exists() || (newData.isString() && newData.val().length >= 2 && newData.val().length <= 60)"
+          },
+          "direction": {
+            ".validate": "!newData.exists() || newData.val() === 'ltr' || newData.val() === 'rtl'"
+          },
+          "status": {
+            ".validate": "!newData.exists() || newData.val() === 'active' || newData.val() === 'inactive'"
+          },
+          "isDefault": {
+            ".validate": "!newData.exists() || newData.isBoolean()"
+          },
+          "sortOrder": {
+            ".validate": "!newData.exists() || (newData.isNumber() && newData.val() >= 0 && newData.val() <= 9999)"
+          },
+          "protected": {
+            ".validate": "!newData.exists() || (newData.isBoolean() && (data.child('protected').val() !== true || newData.val() === true))"
+          },
+          "createdAt": {
+            ".validate": "!newData.exists() || (newData.isNumber() && (!data.exists() || newData.val() === data.val()))"
+          },
+          "updatedAt": {
+            ".validate": "!newData.exists() || newData.isNumber()"
+          },
+          "createdBy": {
+            ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 128)"
+          }
+        }
+      },
+      "translations": {
+        "$translationKey": {
+          ".validate": "!newData.exists() || $translationKey.length <= 200",
+          "$languageCode": {
+            ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 5000)"
+          }
+        },
+        ".write": "(auth != null && root.child('profiles').child(auth.uid).child('active').val() === true && ((root.child('profiles').child(auth.uid).child('role').val() === 'admin' || root.child('profiles').child(auth.uid).child('role').val() === 'master-admin') || (\n      (root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('status').val() === 'active' && root.child('roles').child(root.child('profiles').child(auth.uid).child('role').val()).child('permissions').child('settings_edit').val() === true) ||\n      (root.child('profiles').child(auth.uid).child('role').val() === 'user' && root.child('roles').child('operator').child('status').val() === 'active' && root.child('roles').child('operator').child('permissions').child('settings_edit').val() === true)\n    )))"
+      }
+    }
+  }
+}

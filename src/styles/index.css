@@ -1,0 +1,401 @@
+@import "tailwindcss";
+@import "@heroui/styles";
+
+@theme {
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Bengali",
+    "Hind Siliguri", "Arial", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* ---------------------------------------------------------------------------
+   Centralized design tokens
+   Change these values here instead of patching individual pages.
+   --------------------------------------------------------------------------- */
+:root {
+  --brand: var(--accent);
+  --bn-content-max: 90rem;
+  --bn-page-gap: clamp(1.25rem, 0.85rem + 1.2vw, 1.75rem);
+  --bn-section-gap: clamp(2rem, 1.35rem + 2.4vw, 3.5rem);
+  --bn-card-padding: clamp(1rem, 0.85rem + 0.6vw, 1.5rem);
+  --bn-radius-card: 1.25rem;
+  --bn-shadow-soft: 0 1px 2px color-mix(in oklab, var(--foreground) 7%, transparent);
+  --bn-empty-space: clamp(2rem, 1.4rem + 2vw, 3rem);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  overflow-wrap: break-word;
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus, var(--accent));
+  outline-offset: 2px;
+}
+
+.bn-mono {
+  font-family: var(--font-mono);
+}
+
+/* ---------------------------------------------------------------------------
+   Shared layout primitives
+   --------------------------------------------------------------------------- */
+.bn-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bn-page-gap);
+  min-width: 0;
+}
+
+.bn-page--narrow {
+  width: 100%;
+  max-width: 48rem;
+  margin-inline: auto;
+}
+
+.bn-page--form {
+  width: 100%;
+  max-width: 42rem;
+  margin-inline: auto;
+}
+
+.bn-app-main {
+  width: 100%;
+  max-width: var(--bn-content-max);
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 0.7rem + 1.2vw, 2rem);
+  padding-block: 1.25rem;
+  padding-bottom: 6rem;
+}
+
+@media (min-width: 64rem) {
+  .bn-app-main {
+    padding-block: 2rem;
+    padding-bottom: 2rem;
+  }
+}
+
+.bn-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bn-page-gap);
+}
+
+.bn-section-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 42rem;
+  margin-inline: auto;
+  text-align: center;
+}
+
+.bn-section-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  border-radius: 999px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent);
+  background-color: color-mix(in oklab, var(--accent) 12%, transparent);
+}
+
+.bn-section-title {
+  font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem);
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.bn-section-description {
+  max-width: 38rem;
+  color: var(--muted);
+  font-size: 0.9375rem;
+  line-height: 1.65;
+}
+
+.bn-card-grid {
+  display: grid;
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.bn-card {
+  height: 100%;
+  min-width: 0;
+}
+
+/* ---------------------------------------------------------------------------
+   Centered card pattern
+   Apply to a HeroUI Card; all card slots become horizontally centered while
+   tables, forms and long operational text can opt out with .bn-align-start.
+   --------------------------------------------------------------------------- */
+.bn-card-center {
+  height: 100%;
+  min-width: 0;
+}
+
+.bn-card-center .card__header,
+.bn-card-center .card__content {
+  align-items: center;
+  text-align: center;
+}
+
+.bn-card-center .card__footer {
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.bn-card-center .card__title,
+.bn-card-center .card__description {
+  text-align: center;
+}
+
+.bn-card-center .card__description {
+  max-width: 44ch;
+}
+
+.bn-card-center .bn-align-start {
+  text-align: start;
+}
+
+.bn-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.bn-card-center--compact .card__content {
+  gap: 0.5rem;
+}
+
+.bn-icon-tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  flex-shrink: 0;
+  border-radius: 0.875rem;
+  background-color: color-mix(in oklab, var(--accent) 11%, transparent);
+  color: var(--accent);
+}
+
+.bn-icon-tile--lg {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 1.125rem;
+}
+
+.bn-stat-card .card__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding-block: 0.25rem;
+}
+
+.bn-stat-value {
+  font-size: clamp(1.65rem, 1.3rem + 1.2vw, 2.15rem);
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.bn-stat-label {
+  color: var(--muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.bn-stat-hint {
+  max-width: 30ch;
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.bn-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: var(--bn-empty-space) 1.25rem;
+  text-align: center;
+}
+
+.bn-empty-state__title {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.bn-empty-state__description {
+  max-width: 34rem;
+  margin-inline: auto;
+  color: var(--muted);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.bn-page-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.bn-page-header__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.bn-page-header--center {
+  align-items: center;
+  text-align: center;
+}
+
+.bn-page-header--center .bn-page-header__actions {
+  justify-content: center;
+}
+
+@media (min-width: 40rem) {
+  .bn-page-header:not(.bn-page-header--center) {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+}
+
+.bn-feature-card .card__content {
+  gap: 0.75rem;
+  padding-block: 0.5rem;
+}
+
+.bn-footer-grid {
+  display: grid;
+  gap: 2rem;
+  text-align: center;
+}
+
+.bn-footer-grid > * {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.bn-footer-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+@media (min-width: 48rem) {
+  .bn-footer-grid {
+    grid-template-columns: 1.4fr 1fr 1.2fr;
+    text-align: start;
+  }
+  .bn-footer-grid > * {
+    align-items: flex-start;
+  }
+  .bn-footer-list {
+    align-items: flex-start;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Modal pattern: centered headings and action groups; form bodies stay left.
+   --------------------------------------------------------------------------- */
+.modal__header {
+  align-items: center;
+  text-align: center;
+}
+
+.modal__footer {
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 39.999rem) {
+  .modal__dialog {
+    padding: 1.25rem;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Utilities
+   --------------------------------------------------------------------------- */
+.scrollbar-thin::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, var(--foreground) 25%, transparent);
+  border-radius: 999px;
+}
+
+.highlight-match {
+  background-color: color-mix(in oklab, var(--accent) 35%, transparent);
+  border-radius: 3px;
+  padding: 0 2px;
+}
+
+.bn-icon-tile--success {
+  background-color: color-mix(in oklab, var(--success) 12%, transparent);
+  color: var(--success);
+}
+
+.bn-card--form > .card__content > form {
+  width: 100%;
+}
+
+.bn-card--form > .card__header {
+  align-items: center;
+  text-align: center;
+}
